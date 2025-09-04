@@ -10,14 +10,11 @@ function App() {
 
   return (
     <Routes>
-      {/** 
       <Route path="/login" element={isLoggedIn ? <Navigate to='/'/> : <Login /> } />
-      <Route path="/register" element={isLoggedIn ? <Navigate to='/'/> : <Register /> } />
+      {/*<Route path="/register" element={isAdmin ? <Register />  : <Navigate to='/'/> } />*/}
       <Route path="/" element={!isLoggedIn ? <Navigate to='/login'/> : <Home /> } />
-      */}
-      <Route path="/" element={<Home />} />
-      <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+
     </Routes>
   );
 }

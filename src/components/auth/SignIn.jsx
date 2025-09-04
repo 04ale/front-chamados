@@ -16,7 +16,6 @@ function SignIn() {
     e.preventDefault();
     try {
       const response = await api.post("/auth/login", { email, password });
-      console.log("DADOS RECEBIDOS DO BACK-END:", response.data);
 
       login(response.data);
 

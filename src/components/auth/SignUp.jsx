@@ -3,17 +3,18 @@ import { Link } from "react-router-dom";
 import logo from "../../assets/img/logo1.png";
 import banner from "../../assets/img/banner.png";
 import api from "../../services/api";
+import { useAuth } from "../../hooks/useAuth";
 
 function SignUp() {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
 
-
   const handleSignUp = async (e) => {
     try {
       e.preventDefault();
-      await api.post("/auth/register", { name, email, role: "user" });
-      alert("Usuário cadastrado com sucesso!")
+      const response = await api.post("/auth/register", { name, email, role: "user" });
+      console.log("Senha do "+ response.data.user.name + ": " + response.data.senha)
+      alert("Usuário cadastrado com sucesso!\n"+ "Senha: " + response.data.senha)
       setEmail('')
       setName('')
 
