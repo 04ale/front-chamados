@@ -2,21 +2,54 @@ import { useState, useEffect } from "react";
 import api from "../services/api";
 import { useAuth } from "../hooks/useAuth";
 import { ChevronLeft, ChevronRight, Search, User } from "lucide-react";
+import TicketDetail from "./TicketDetail";
 
 function Tickets() {
   const { user } = useAuth();
   const [currentPage, setCurrentPage] = useState(1);
   const [tickets, setTickets] = useState([]);
+  const [ticket, setTicket] = useState([]);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+
+  function change(info) {
+    if (info === "low") {
+      info = "pequena";
+      return info;
+    }
+    if (info === "medium") {
+      info = "médio";
+      return info;
+    }
+    if (info === "high") {
+      info = "alta";
+
+      return info;
+    }
+  }
+
+  const handleTicketDeleted = (deletedTicketId) => {
+    setTickets(currentTickets => 
+      currentTickets.filter(ticket => ticket.id !== deletedTicketId)
+    );
+  };
+
+  const openDetails = () => {
+    setIsDetailsOpen(true);
+  };
+
+  const closeDetails = () => {
+    setIsDetailsOpen(false);
+  };
 
   const capitalizeFirstLetter = (string) => {
-  if (!string || string.length === 0) {
-    return "";
-  }
-  const firstLetter = string.charAt(0).toUpperCase();
-  const restOfWord = string.slice(1);
-  
-  return firstLetter + restOfWord;
-};
+    if (!string || string.length === 0) {
+      return "";
+    }
+    const firstLetter = string.charAt(0).toUpperCase();
+    const restOfWord = string.slice(1);
+
+    return firstLetter + restOfWord;
+  };
 
   useEffect(() => {
     async function getTickets() {
@@ -39,68 +72,96 @@ function Tickets() {
     getTickets();
   }, [user, currentPage]);
 
+
   return (
     <div className="">
       <div className="w-full h-full flex flex-col gap-4 ">
         <div>
-          <div className="md:p-10 max-md:p-7">
+          <div className="md:p-10 max-md:p-7 text-[#5A2C40]">
             <h1 className="text-4xl font-bold ">Tickets</h1>
-            <p className="text-2xl font-semibold">{capitalizeFirstLetter(user?.name)}</p>
+            <p className="text-2xl font-semibold">
+              {capitalizeFirstLetter(user?.name)}
+            </p>
           </div>
 
-          <div className="mx-4 border-t border-b border-gray-200">
-            <div className="grid md:grid-cols-[2fr_3fr_3fr_1fr_1fr_auto] max-md:grid-cols-[1fr_1fr_1fr_auto] max-sm:grid-cols-[2fr_3fr_auto] gap-4 items-center font-bold bg-gray-50 py-2 px-3">
+          <div className="border-b border-[#8C847E]">
+            <div className="grid lg:grid-cols-[2fr_3fr_3fr_1fr_1fr_auto] max-lg:grid-cols-[2fr_3fr_1fr_auto] max-sm:grid-cols-[2fr_3fr_auto] gap-4 items-center font-bold bg-[#FFFBF5] py-2 px-3 text-[#8C847E]">
               <p>Nome</p>
-              <p className="max-sm:hidden">E-mail</p>
+              <p className="max-lg:hidden">E-mail</p>
               <p>Título</p>
-              <p className="max-md:hidden">Status</p>
-              <p className="max-md:hidden">Prioridade</p>
+              <p className="max-lg:hidden">Status</p>
+              <p className="max-sm:hidden">Prioridade</p>
               <span className="w-6 h-6"></span>
             </div>
 
-            <ul className="flex flex-col">
+            <ul className="flex flex-col text-[#5A2C40]">
               {tickets.map((ticket) => (
                 <li
                   key={ticket.id}
-                  className="grid md:grid-cols-[2fr_3fr_3fr_1fr_1fr_auto] max-md:grid-cols-[2fr_2fr_2fr_auto] max-sm:grid-cols-[2fr_3fr_auto] divide-x-1 divide-gray-300 gap-4 items-center border-t border-gray-200 bg-white py-2 md:pl-3 font-semibold"
+                  className="grid lg:grid-cols-[2fr_3fr_3fr_1fr_1fr_auto] max-lg:grid-cols-[2fr_3fr_1fr_auto] max-sm:grid-cols-[2fr_3fr_auto] max-md:px-2 md:px-4 divide-x-1 divide-[#8C847E] gap-4 items-center border-t border-gray-200 bg-[#FFFBF5] py-2 font-semibold"
                 >
                   <div className="flex items-center gap-2 truncate">
                     <User size={16} />
-                    <p className="truncate">{ticket.creator.name}</p>
+                    <p className="truncate">
+                      {capitalizeFirstLetter(ticket.creator.name)}
+                    </p>
                   </div>
 
-                  <p className="truncate max-sm:hidden">{ticket.creator.email}</p>
+                  <p className="truncate max-lg:hidden">
+                    {ticket.creator.email}
+                  </p>
 
                   <p className="truncate">
                     {capitalizeFirstLetter(ticket.title)}
                   </p>
 
-                  <p className="max-md:hidden">{ticket.status}</p>
+                  <p className="max-lg:hidden">
+                    {capitalizeFirstLetter(ticket.status)}
+                  </p>
 
-                  <p className="max-md:hidden">{ticket.priority}</p>
+                  <p className="max-sm:hidden">
+                    {capitalizeFirstLetter(change(ticket.priority))}
+                  </p>
 
-                  <button className="text-[#17A2B8] flex justify-center">
-                    <Search className="cursor-pointer" size={20} />
+                  <button className="text-[#8B4571] flex justify-center">
+                    <Search
+                      className="cursor-pointer"
+                      size={20}
+                      onClick={() => {
+                        openDetails();
+                        setTicket(ticket);
+                      }}
+                    />
                   </button>
                 </li>
               ))}
             </ul>
           </div>
         </div>
-
-        <div className="justify-center items-center flex flex-row gap-5 mt-4">
+        {tickets.length > 29 ? (
+          <div className="justify-between items-center flex flex-row px-8 mt-2">
+            <ChevronLeft
+              size={50}
+              onClick={() => setCurrentPage(currentPage - 1)}
+              className=" bg-[#8B4571]/30 text-[#5A2C40] rounded-2xl cursor-pointer"
+            />
+            <ChevronRight
+              size={50}
+              onClick={() => setCurrentPage(currentPage + 1)}
+              className=" bg-[#8B4571]/30 text-[#5A2C40] rounded-2xl cursor-pointer"
+            />
+          </div>
+        ) : (
           <ChevronLeft
             size={50}
             onClick={() => setCurrentPage(currentPage - 1)}
-            className=" bg-[#17A2B8]/20 rounded-2xl cursor-pointer"
+            className=" bg-[#8B4571]/30 text-[#5A2C40] rounded-2xl cursor-pointer"
           />
-          <ChevronRight
-            size={50}
-            onClick={() => setCurrentPage(currentPage + 1)}
-            className=" bg-[#17A2B8]/20 rounded-2xl cursor-pointer"
-          />
-        </div>
+        )}
       </div>
+      {isDetailsOpen && (
+        <TicketDetail onClose={closeDetails} ticketInfo={ticket} onTicketDeleted={handleTicketDeleted}/>
+      )}
     </div>
   );
 }

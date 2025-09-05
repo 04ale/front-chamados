@@ -1,16 +1,17 @@
-import React from "react";
+import ListUsers from "../components/ListUsers";
 import Navbar from "../components/Navbar";
-import Tickets from "../components/Tickets";
 
-function Home() {
+function Users() {
+  
+
   return (
     <div>
       <Navbar />
       <div className="md:ml-[119px] xl:ml-[329px] max-md:pt-[40px]">
-        <Tickets />
+        <ListUsers />
       </div>
     </div>
   );
 }
 
-export default Home;
+export default Users;

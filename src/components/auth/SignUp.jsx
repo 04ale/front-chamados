@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import logo from "../../assets/img/logo1.png";
+import logo from "../../assets/img/logoVinho.png";
 import banner from "../../assets/img/banner.png";
 import api from "../../services/api";
 import { useAuth } from "../../hooks/useAuth";
@@ -8,11 +8,14 @@ import { useAuth } from "../../hooks/useAuth";
 function SignUp() {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
+  const {user} = useAuth()
 
   const handleSignUp = async (e) => {
     try {
       e.preventDefault();
-      const response = await api.post("/auth/register", { name, email, role: "user" });
+      const response = await api.post("/auth/register", { name, email, role: "user" },  {headers:{
+              Authorization: `Bearer ${user.token}`,}
+            },);
       console.log("Senha do "+ response.data.user.name + ": " + response.data.senha)
       alert("Usuário cadastrado com sucesso!\n"+ "Senha: " + response.data.senha)
       setEmail('')
@@ -34,17 +37,17 @@ function SignUp() {
         <div className="lg:w-[380px] flex flex-col gap-10">
           <img src={logo} alt="" />
           <div className="flex flex-col gap-8 items-center w-full ">
-            <h1 className="text-4xl font-bold text-[#17A2B8]">CADASTRO</h1>
+            <h1 className="text-4xl font-bold text-[#5A2C40]">CADASTRO</h1>
             <div className="flex flex-col w-full gap-4">
               <input
-                className="bg-[#17A2B8]/10 p-4 w-full rounded-2xl"
+                className="bg-[#5A2C40]/20 p-4 w-full rounded-2xl"
                 type="text"
                 placeholder="Nome:"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
               />
               <input
-                className="bg-[#17A2B8]/10 p-4 w-full rounded-2xl"
+                className="bg-[#5A2C40]/20 p-4 w-full rounded-2xl"
                 type="email"
                 placeholder="E-mail:"
                 value={email}
@@ -54,16 +57,16 @@ function SignUp() {
             </div>
             <button
               type="submit"
-              className="px-7 cursor-pointer font-semibold p-4 bg-[#17A2B8] hover:bg-[#13b8d1] text-white rounded-2xl"
+              className="px-7 cursor-pointer font-semibold p-4 bg-[#5A2C40] hover:bg-[#8B4571] duration-300 transition-all text-white rounded-2xl"
             >
               Cadastrar
             </button>
             <p>
               <Link
                 to="/login"
-                className="text-[#17A2B8] font-semibold cursor-pointer"
+                className="text-[#5A2C40] font-semibold cursor-pointer"
               >
-                Fazer login
+                Voltar
               </Link>
             </p>
           </div>

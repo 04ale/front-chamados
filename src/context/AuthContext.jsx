@@ -1,5 +1,8 @@
 import React, { createContext, useState, useEffect } from "react";
+import { jwtDecode } from 'jwt-decode';
 
+
+// eslint-disable-next-line react-refresh/only-export-components
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
@@ -15,13 +18,29 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = (userData) => {
-    localStorage.setItem("authData", JSON.stringify(userData));
-    setUser(userData);
-  };
+  if (userData?.token) {
+    try {
+      const decodedToken = jwtDecode(userData.token);
+      
+      const expirationTime = decodedToken.exp * 1000;
+
+      const dataToStore = {
+        ...userData,
+        expiration: expirationTime,
+      };
+
+      localStorage.setItem("authData", JSON.stringify(dataToStore));
+
+      setUser(dataToStore);
+
+    } catch (error) {
+      console.error("Erro ao decodificar o token:", error);
+    }
+  }
+};
 
   const logout = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
+    localStorage.removeItem("authData");
     setUser(null);
   };
 

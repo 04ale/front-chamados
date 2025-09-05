@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import logo from "../../assets/img/logo1.png";
+import logo from "../../assets/img/logoVinho.png";
 import banner from "../../assets/img/banner.png";
 import { useAuth } from "../../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -34,17 +34,17 @@ function SignIn() {
         <div className="lg:w-[380px] flex flex-col gap-10">
           <img src={logo} alt="" />
           <div className="flex flex-col gap-8 items-center w-full ">
-            <h1 className="text-4xl font-bold text-[#17A2B8]">LOGIN</h1>
+            <h1 className="text-4xl font-bold text-[#5A2C40]">LOGIN</h1>
             <div className="flex flex-col w-full gap-4">
               <input
-                className="bg-[#17A2B8]/10 p-4 w-full rounded-2xl"
+                className="bg-[#5A2C40]/20 p-4 w-full rounded-2xl"
                 type="email"
                 placeholder="E-mail:"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
               <input
-                className="bg-[#17A2B8]/10 p-4 w-full rounded-2xl"
+                className="bg-[#5A2C40]/20 p-4 w-full rounded-2xl"
                 type="password"
                 placeholder="Senha:"
                 value={password}
@@ -53,18 +53,10 @@ function SignIn() {
             </div>
             <button
               type="submit"
-              className="px-7 cursor-pointer font-semibold p-4 bg-gradient-to-r from-[#74abcf] via-[#539ccc] to-[#17A2B8] text-white rounded-2xl"
+              className="px-7 cursor-pointer font-semibold p-4 bg-[#5A2C40] hover:bg-[#8B4571] text-white rounded-2xl"
             >
               Login
             </button>
-            {isAdmin ? (
-              <Link
-                to="/register"
-                className="text-[#17A2B8] font-semibold cursor-pointer"
-              >
-                Cadastrar novo usuário
-              </Link>
-            ) : null}
           </div>
         </div>
       </form>
