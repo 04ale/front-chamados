@@ -3,6 +3,8 @@ import api from "../services/api";
 import { useAuth } from "../hooks/useAuth";
 import { ChevronLeft, ChevronRight, Search, User } from "lucide-react";
 import TicketDetail from "./TicketDetail";
+import Comments from "./Comments";
+import Update from "./Update";
 
 function Tickets() {
   const { user } = useAuth();
@@ -10,35 +12,81 @@ function Tickets() {
   const [tickets, setTickets] = useState([]);
   const [ticket, setTicket] = useState([]);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [isCommentsOpen, setIsCommentsOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
 
-  function change(info) {
-    if (info === "low") {
-      info = "pequena";
-      return info;
+  function change(text){
+    if (text === "Em_andamento"){
+      return <p>Em andamento</p>
     }
-    if (info === "medium") {
-      info = "médio";
-      return info;
+    if (text === "Aberto"){
+      return <p>Aberto</p>
     }
-    if (info === "high") {
-      info = "alta";
+    if(text === "Fechado") {
+      return <p>Fechado</p>
+    }
+    
+  }
 
-      return info;
+  function getPriorityInfo(priority) {
+    switch (priority) {
+      case "low":
+        return {
+          text: "Baixa",
+          className: "text-green-500",
+        };
+      case "medium":
+        return {
+          text: "Media",
+          className: "text-yellow-500",
+        };
+      case "high":
+        return {
+          text: "Alta",
+          className: "text-red-500 font-bold",
+        };
+      default:
+        return {
+        text: priority || "N/A", 
+        className: "text-gray-500",
+      };
     }
   }
 
   const handleTicketDeleted = (deletedTicketId) => {
-    setTickets(currentTickets => 
-      currentTickets.filter(ticket => ticket.id !== deletedTicketId)
+    setTickets((currentTickets) =>
+      currentTickets.filter((ticket) => ticket.id !== deletedTicketId)
     );
   };
 
   const openDetails = () => {
     setIsDetailsOpen(true);
+    setIsCommentsOpen(false);
+    setIsEditOpen(false);
   };
 
   const closeDetails = () => {
     setIsDetailsOpen(false);
+  };
+
+  const openComments = () => {
+    setIsDetailsOpen(false);
+    setIsCommentsOpen(true);
+    setIsEditOpen(false);
+  };
+
+  const closeComments = () => {
+    setIsCommentsOpen(false);
+  };
+
+  const openEdit = () => {
+    setIsDetailsOpen(false);
+    setIsCommentsOpen(false);
+    setIsEditOpen(true);
+  };
+
+  const closeEdit = () => {
+    setIsEditOpen(false);
   };
 
   const capitalizeFirstLetter = (string) => {
@@ -72,7 +120,6 @@ function Tickets() {
     getTickets();
   }, [user, currentPage]);
 
-
   return (
     <div className="">
       <div className="w-full h-full flex flex-col gap-4 ">
@@ -95,8 +142,9 @@ function Tickets() {
             </div>
 
             <ul className="flex flex-col text-[#5A2C40]">
-              {tickets.map((ticket) => (
-                <li
+              {tickets.map((ticket) => {
+                const priorityInfo = getPriorityInfo(ticket.priority);
+                return(<li
                   key={ticket.id}
                   className="grid lg:grid-cols-[2fr_3fr_3fr_1fr_1fr_auto] max-lg:grid-cols-[2fr_3fr_1fr_auto] max-sm:grid-cols-[2fr_3fr_auto] max-md:px-2 md:px-4 divide-x-1 divide-[#8C847E] gap-4 items-center border-t border-gray-200 bg-[#FFFBF5] py-2 font-semibold"
                 >
@@ -116,11 +164,11 @@ function Tickets() {
                   </p>
 
                   <p className="max-lg:hidden">
-                    {capitalizeFirstLetter(ticket.status)}
+                    {change(capitalizeFirstLetter(ticket.status))}
                   </p>
 
-                  <p className="max-sm:hidden">
-                    {capitalizeFirstLetter(change(ticket.priority))}
+                  <p className={`max-sm:hidden ${priorityInfo.className}`}>
+                    {priorityInfo.text}
                   </p>
 
                   <button className="text-[#8B4571] flex justify-center">
@@ -133,8 +181,9 @@ function Tickets() {
                       }}
                     />
                   </button>
-                </li>
-              ))}
+                </li>)
+                
+              })}
             </ul>
           </div>
         </div>
@@ -143,25 +192,35 @@ function Tickets() {
             <ChevronLeft
               size={50}
               onClick={() => setCurrentPage(currentPage - 1)}
-              className=" bg-[#8B4571]/30 text-[#5A2C40] rounded-2xl cursor-pointer"
+              className=" bg-[#8B4571]/30 text-[#5A2C40] rounded-lg cursor-pointer"
             />
             <ChevronRight
               size={50}
               onClick={() => setCurrentPage(currentPage + 1)}
-              className=" bg-[#8B4571]/30 text-[#5A2C40] rounded-2xl cursor-pointer"
+              className=" bg-[#8B4571]/30 text-[#5A2C40] rounded-lg cursor-pointer"
             />
           </div>
         ) : (
           <ChevronLeft
             size={50}
             onClick={() => setCurrentPage(currentPage - 1)}
-            className=" bg-[#8B4571]/30 text-[#5A2C40] rounded-2xl cursor-pointer"
+            className=" bg-[#8B4571]/30 text-[#5A2C40] rounded-lg cursor-pointer"
           />
         )}
       </div>
       {isDetailsOpen && (
-        <TicketDetail onClose={closeDetails} ticketInfo={ticket} onTicketDeleted={handleTicketDeleted}/>
+        <TicketDetail
+          closeDetails={closeDetails}
+          openComments={openComments}
+          openEdit={openEdit}
+          ticketInfo={ticket}
+          onTicketDeleted={handleTicketDeleted}
+        />
       )}
+      {isCommentsOpen && (
+        <Comments closeComments={closeComments} ticketId={ticket.id} />
+      )}
+      {isEditOpen && <Update closeEdit={closeEdit} ticketInfo={ticket} />}
     </div>
   );
 }

@@ -40,7 +40,12 @@ function Navbar() {
   };
 
   const handleLogout = () => {
-    logout();
+    let res = confirm("Tem certeza que deseja deslogar?");
+
+    if (res) {
+      logout();
+    }
+    
   };
   return (
     <nav className="  flex flex-col">

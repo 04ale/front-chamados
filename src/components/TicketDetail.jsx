@@ -6,7 +6,13 @@ import { User, X } from "lucide-react";
 import Comments from "./Comments";
 import Update from "./Update";
 
-function TicketDetail({ onClose, ticketInfo, onTicketDeleted }) {
+function TicketDetail({
+  closeDetails,
+  openComments,
+  openEdit,
+  ticketInfo,
+  onTicketDeleted,
+}) {
   const { user, isAdmin } = useAuth();
   const [ticket, setTicket] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -41,15 +47,19 @@ function TicketDetail({ onClose, ticketInfo, onTicketDeleted }) {
 
   async function handleDeleteTicket(id) {
     try {
-      await api.delete(`/tickets/${id}`, {
-        headers: {
-          Authorization: `Bearer ${user.token}`,
-        },
-      });
+      let res = confirm("Tem certeza que deseja exluir esse ticket?");
 
-      alert("Ticket excluído com sucesso!");
-      onTicketDeleted(id);
-      onClose();
+      if (res) {
+        await api.delete(`/tickets/${id}`, {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+        });
+
+        alert("Ticket excluído com sucesso!");
+        onTicketDeleted(id);
+        closeDetails();
+      }
     } catch (error) {
       console.error("Erro ao excluir ticket:", error);
       alert("Não foi possível excluir o ticket. Tente novamente.");
@@ -97,16 +107,14 @@ function TicketDetail({ onClose, ticketInfo, onTicketDeleted }) {
     );
   }
 
-  
-
   return (
     <div className="h-screen w-screen fixed top-0 left-0 bg-black/60 flex justify-center items-center">
       <X
-        onClick={onClose}
-        className="absolute top-0 right-0 text-white mt-5 mr-5 font-bold cursor-pointer"
+        onClick={closeDetails}
+        className="absolute top-0 right-0 text-white mt-5 mr-5 font-bold cursor-pointer max-md:mt-17"
         size={40}
       />
-      <div className="max-sm:mx-[20px] sm:mx-[40px] md:mx-[60px] lg:w-[900px] max-h-[90vh] overflow-auto text-[#5A2C40] bg-[#FFFBF5] rounded-lg p-6">
+      <div className="max-sm:mx-[20px] sm:mx-[40px] md:mx-[60px] lg:w-[900px] max-h-[80vh] overflow-auto text-[#5A2C40] bg-[#FFFBF5] rounded-lg p-6">
         {" "}
         <div className="flex flex-col gap-4 mb-10">
           <div>
@@ -134,7 +142,7 @@ function TicketDetail({ onClose, ticketInfo, onTicketDeleted }) {
             {ticketInfo.description && (
               <div>
                 <p className="text-xl font-bold">Descrição: </p>
-                <p className="text-xl">
+                <p className="text-xl text-balance">
                   {capitalizeFirstLetter(ticketInfo.description)}
                 </p>
               </div>
@@ -161,17 +169,13 @@ function TicketDetail({ onClose, ticketInfo, onTicketDeleted }) {
             {" "}
             <button
               className="bg-[#396eaf] hover:bg-[#2c5180] rounded-lg py-3 duration-300 transition-all text-white cursor-pointer font-semibold"
-              onClick={() => {
-                onClose();
-              }}
+              onClick={openComments}
             >
               Comentarios
             </button>
             <button
               className="bg-[#C89F5B] hover:bg-[#aa874f] rounded-lg py-3 text-white cursor-pointer duration-300 transition-all font-semibold"
-              onClick={() => {
-                onClose();
-              }}
+              onClick={openEdit}
             >
               Editar Ticket
             </button>
@@ -187,10 +191,7 @@ function TicketDetail({ onClose, ticketInfo, onTicketDeleted }) {
             {" "}
             <button
               className="bg-[#396eaf] hover:bg-[#2c5180] rounded-lg py-3 max-lg: px-6 lg:px-8 duration-300 transition-all text-white cursor-pointer font-semibold"
-              onClick={() => {
-                onClose();
-
-              }}
+              onClick={openComments}
             >
               Comentarios
             </button>

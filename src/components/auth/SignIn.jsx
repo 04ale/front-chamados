@@ -21,7 +21,7 @@ function SignIn() {
 
       nav("/");
     } catch (err) {
-      console.error("Erro de login:", err);
+      alert("Erro de login:", err);
     }
   };
 

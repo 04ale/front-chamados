@@ -4,9 +4,9 @@ import api from "../services/api";
 import { useAuth } from "../hooks/useAuth";
 
 function NewTicket({ onClose }) {
-  const [title, setTitle] = useState();
-  const [description, setDescription] = useState();
-  const [priority, setPriority] = useState();
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [priority, setPriority] = useState('');
   const { user } = useAuth();
 
   async function createTicket() {
