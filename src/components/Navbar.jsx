@@ -16,7 +16,7 @@ import { useState } from "react";
 import NewTicket from "./NewTicket";
 
 function Navbar() {
-  const { logout, isAdmin } = useAuth();
+  const { logout, isAdmin, user, isLoggedIn } = useAuth();
   const nav = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -45,10 +45,9 @@ function Navbar() {
     if (res) {
       logout();
     }
-    
   };
   return (
-    <nav className="  flex flex-col">
+    <nav className="flex flex-col">
       <div className="p-3 md:hidden px-6 w-full fixed top-0 text-[#F7F0E4] border-b border-b-[#F7F0E4]/10 bg-[#5A2C40] shadow-md flex justify-between items-center z-40">
         <img src={logo1} className="w-auto h-8 max-sm:hidden" />
         <img src={logo2} className="h-8 sm:hidden" />
@@ -104,11 +103,13 @@ function Navbar() {
             )}
 
             <div className="w-24 h-[1px] bg-[#F7F0E4]/30 self-center"></div>
+            {isLoggedIn && (
+              <div className="flex items-center gap-4 cursor-pointer">
+                <User size={32} />
+                <p className="text-3xl font-semibold">Usuário</p>
+              </div>
+            )}
 
-            <div className="flex items-center gap-4 cursor-pointer">
-              <User size={32} />
-              <p className="text-3xl font-semibold">Usuário</p>
-            </div>
             <div
               onClick={handleLogout}
               className="flex items-center gap-4 cursor-pointer"
@@ -124,7 +125,7 @@ function Navbar() {
         <div className="flex flex-col gap-12 max-xl:items-center">
           <img src={logo1} className="w-47 h-8 max-xl:hidden" />
           <img src={logo2} className="h-8 w-12 xl:hidden" />
-          <div className="flex flex-col gap-7 max-xl:items-center">
+          <div className="flex flex-col gap-7 max-xl:items-center xl:w-[225px]">
             <div
               className="flex items-center  flex-row gap-3 font-semibold p-3 rounded-lg transition-all duration-300 cursor-pointer hover:bg-[#8B4571] hover:translate-x-2"
               onClick={() => nav("/")}
@@ -165,17 +166,20 @@ function Navbar() {
           </div>
         </div>
         <div className="flex flex-col gap-7 max-xl:items-center">
-          <div className="flex items-center font-semibold flex-row gap-3 p-3 rounded-lg transition-all duration-300 cursor-pointer hover:bg-[#8B4571] hover:translate-x-2">
-            <User className="cursor-pointer items-center" size={30} />
-            <p className="max-xl:hidden cursor-pointer text-xl">Usuário</p>
-          </div>
+          {isLoggedIn && (
+            <div className="flex items-center font-semibold flex-row gap-3 p-3 rounded-lg transition-all duration-300 cursor-pointer hover:bg-[#8B4571] hover:translate-x-2">
+              <User className="cursor-pointer items-center" size={30} />
+              <p className="max-xl:hidden cursor-pointer text-xl break-words">
+                {user.name.split(' ').slice(0, 1)}
+              </p>
+            </div>
+          )}
 
-          <div className="flex items-center font-semibold flex-row gap-3 p-3 rounded-lg transition-all duration-300 cursor-pointer hover:bg-[#8B4571] hover:translate-x-2">
-            <LogOut
-              onClick={handleLogout}
-              size={30}
-              className=" transition-all"
-            />
+          <div
+            onClick={handleLogout}
+            className="flex items-center font-semibold flex-row gap-3 p-3 rounded-lg transition-all duration-300 cursor-pointer hover:bg-[#8B4571] hover:translate-x-2"
+          >
+            <LogOut size={30} className=" transition-all" />
             <p className="max-xl:hidden cursor-pointer text-xl">Sair</p>
           </div>
         </div>

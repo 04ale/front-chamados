@@ -9,12 +9,27 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true); 
 
-  useEffect(() => {
-    const storedUser = localStorage.getItem("authData");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
+   useEffect(() => {
+    try {
+      const storedData = localStorage.getItem("authData");
+      if (storedData) {
+        const authData = JSON.parse(storedData);
+        
+        if (authData.expiration && authData.expiration < Date.now()) {
+          console.log("Token expirado, limpando sessão.");
+          localStorage.removeItem("authData");
+          setUser(null);
+        } else {
+          setUser(authData);
+        }
+      }
+    } catch (error) {
+      console.error("Erro ao processar dados de autenticação:", error);
+      localStorage.removeItem("authData");
+      setUser(null);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false); 
   }, []);
 
   const login = (userData) => {

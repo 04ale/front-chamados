@@ -1,7 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import api from "../services/api";
 import { useAuth } from "../hooks/useAuth";
-import { ChevronLeft, ChevronRight, Search, User } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+  Search,
+  User,
+} from "lucide-react";
 import TicketDetail from "./TicketDetail";
 import Comments from "./Comments";
 import Update from "./Update";
@@ -14,19 +21,10 @@ function Tickets() {
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [isCommentsOpen, setIsCommentsOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
-
-  function change(text){
-    if (text === "Em_andamento"){
-      return <p>Em andamento</p>
-    }
-    if (text === "Aberto"){
-      return <p>Aberto</p>
-    }
-    if(text === "Fechado") {
-      return <p>Fechado</p>
-    }
-    
-  }
+  const [pagination, setPagination] = useState([]);
+  const [loading, setLoading] = useState(false)
+  const screenRef = useRef();
+  
 
   function getPriorityInfo(priority) {
     switch (priority) {
@@ -47,9 +45,9 @@ function Tickets() {
         };
       default:
         return {
-        text: priority || "N/A", 
-        className: "text-gray-500",
-      };
+          text: priority || "N/A",
+          className: "text-gray-500",
+        };
     }
   }
 
@@ -98,9 +96,14 @@ function Tickets() {
 
     return firstLetter + restOfWord;
   };
+  
+  const handleBack = () => {
+    setIsDetailsOpen(true);
+    setIsCommentsOpen(false);
+    setIsEditOpen(false);
+  }
 
-  useEffect(() => {
-    async function getTickets() {
+  async function getTickets() {
       if (user && user.token) {
         try {
           const response = await api.get(`/tickets`, {
@@ -111,20 +114,35 @@ function Tickets() {
               page: currentPage,
             },
           });
+          setPagination(response.data.pagination);
           setTickets(response.data.tickets);
         } catch (error) {
           console.error("ERRO: ", error);
+        } finally {
+          setLoading(false);
         }
       }
     }
+
+  useEffect(() => {
     getTickets();
   }, [user, currentPage]);
+
+  useEffect(() => {
+    if (!loading && screenRef.current) {
+      screenRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [tickets]);
+
+  if (loading) {
+    return (<p className="flex items-center justify-center font-bold text-4xl mt-10 text-[#5A2C40]">Carregando...</p>)
+  }
 
   return (
     <div className="">
       <div className="w-full h-full flex flex-col gap-4 ">
         <div>
-          <div className="md:p-10 max-md:p-7 text-[#5A2C40]">
+          <div className="md:p-10 max-md:p-7 text-[#5A2C40]" ref={screenRef}>
             <h1 className="text-4xl font-bold ">Tickets</h1>
             <p className="text-2xl font-semibold">
               {capitalizeFirstLetter(user?.name)}
@@ -144,69 +162,83 @@ function Tickets() {
             <ul className="flex flex-col text-[#5A2C40]">
               {tickets.map((ticket) => {
                 const priorityInfo = getPriorityInfo(ticket.priority);
-                return(<li
-                  key={ticket.id}
-                  className="grid lg:grid-cols-[2fr_3fr_3fr_1fr_1fr_auto] max-lg:grid-cols-[2fr_3fr_1fr_auto] max-sm:grid-cols-[2fr_3fr_auto] max-md:px-2 md:px-4 divide-x-1 divide-[#8C847E] gap-4 items-center border-t border-gray-200 bg-[#FFFBF5] py-2 font-semibold"
-                >
-                  <div className="flex items-center gap-2 truncate">
-                    <User size={16} />
-                    <p className="truncate">
-                      {capitalizeFirstLetter(ticket.creator.name)}
+                return (
+                  <li
+                    key={ticket.id}
+                    className="grid lg:grid-cols-[2fr_3fr_3fr_1fr_1fr_auto] max-lg:grid-cols-[2fr_3fr_1fr_auto] max-sm:grid-cols-[2fr_3fr_auto] max-md:px-2 md:px-4 divide-x-1 divide-[#8C847E] gap-4 items-center border-t border-gray-200 bg-[#FFFBF5] py-2 font-semibold"
+                  >
+                    <div className="flex items-center gap-2 truncate">
+                      <User size={16} />
+                      <p className="truncate">
+                        {capitalizeFirstLetter(ticket.creator.name)}
+                      </p>
+                    </div>
+
+                    <p className="truncate max-lg:hidden">
+                      {ticket.creator.email}
                     </p>
-                  </div>
 
-                  <p className="truncate max-lg:hidden">
-                    {ticket.creator.email}
-                  </p>
+                    <p className="truncate">
+                      {capitalizeFirstLetter(ticket.title)}
+                    </p>
 
-                  <p className="truncate">
-                    {capitalizeFirstLetter(ticket.title)}
-                  </p>
+                    <p className="max-lg:hidden">
+                      {capitalizeFirstLetter(ticket.status.replace("_", " "))}
+                    </p>
 
-                  <p className="max-lg:hidden">
-                    {change(capitalizeFirstLetter(ticket.status))}
-                  </p>
+                    <p className={`max-sm:hidden ${priorityInfo.className}`}>
+                      {priorityInfo.text}
+                    </p>
 
-                  <p className={`max-sm:hidden ${priorityInfo.className}`}>
-                    {priorityInfo.text}
-                  </p>
-
-                  <button className="text-[#8B4571] flex justify-center">
-                    <Search
-                      className="cursor-pointer"
-                      size={20}
-                      onClick={() => {
-                        openDetails();
-                        setTicket(ticket);
-                      }}
-                    />
-                  </button>
-                </li>)
-                
+                    <button className="text-[#8B4571] flex justify-center">
+                      <Search
+                        className="cursor-pointer"
+                        size={20}
+                        onClick={() => {
+                          openDetails();
+                          setTicket(ticket);
+                        }}
+                      />
+                    </button>
+                  </li>
+                );
               })}
             </ul>
           </div>
         </div>
-        {tickets.length > 29 ? (
-          <div className="justify-between items-center flex flex-row px-8 mt-2">
-            <ChevronLeft
-              size={50}
-              onClick={() => setCurrentPage(currentPage - 1)}
-              className=" bg-[#8B4571]/30 text-[#5A2C40] rounded-lg cursor-pointer"
-            />
-            <ChevronRight
-              size={50}
-              onClick={() => setCurrentPage(currentPage + 1)}
-              className=" bg-[#8B4571]/30 text-[#5A2C40] rounded-lg cursor-pointer"
-            />
-          </div>
-        ) : (
-          <ChevronLeft
-            size={50}
-            onClick={() => setCurrentPage(currentPage - 1)}
-            className=" bg-[#8B4571]/30 text-[#5A2C40] rounded-lg cursor-pointer"
-          />
-        )}
+        <div className="justify-between items-center flex flex-row px-8 mt-2">
+          {currentPage !== 1 && (
+            <div className="flex gap-4">
+              <ChevronsLeft
+                size={50}
+                onClick={() => setCurrentPage(1)}
+                className=" bg-[#8B4571]/30 hover:bg-[#8B4571]/40 hover:text-[#5a1c37] duration-200 transition-all text-[#5A2C40] rounded-lg cursor-pointer"
+              />
+              <ChevronLeft
+                size={50}
+                onClick={() => setCurrentPage(currentPage - 1)}
+                className=" bg-[#8B4571]/30 hover:bg-[#8B4571]/40 hover:text-[#5a1c37] duration-200 transition-all text-[#5A2C40] rounded-lg cursor-pointer"
+              />
+            </div>
+          )}
+          {tickets.length > 29 && (
+            <div className="w-full flex justify-between">
+              <p></p>
+              <div className="flex gap-4">
+                <ChevronRight
+                  size={50}
+                  onClick={() => setCurrentPage(currentPage + 1)}
+                  className=" bg-[#8B4571]/30 hover:bg-[#8B4571]/40 hover:text-[#5a1c37] text-[#5A2C40] duration-200 transition-all rounded-lg cursor-pointer"
+                />
+                <ChevronsRight
+                  size={50}
+                  className=" bg-[#8B4571]/30 hover:bg-[#8B4571]/40 hover:text-[#5a1c37] text-[#5A2C40] duration-200 transition-all rounded-lg cursor-pointer"
+                  onClick={() => setCurrentPage(pagination.lastPage)}
+                />
+              </div>
+            </div>
+          )}
+        </div>
       </div>
       {isDetailsOpen && (
         <TicketDetail
@@ -218,9 +250,9 @@ function Tickets() {
         />
       )}
       {isCommentsOpen && (
-        <Comments closeComments={closeComments} ticketId={ticket.id} />
+        <Comments closeComments={closeComments} ticketInfo={ticket} capitalizeFirstLetter={capitalizeFirstLetter} ticketId={ticket.id} handleBack={handleBack}/>
       )}
-      {isEditOpen && <Update closeEdit={closeEdit} ticketInfo={ticket} />}
+      {isEditOpen && <Update closeEdit={closeEdit} ticketInfo={ticket} handleBack={handleBack}/>}
     </div>
   );
 }

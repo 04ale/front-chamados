@@ -152,9 +152,10 @@ function TicketDetail({
               <div>
                 <p className="text-xl font-bold">Status: </p>
                 <p className="text-xl ">
-                  {capitalizeFirstLetter(ticketInfo.status)}
+                  {capitalizeFirstLetter(ticketInfo.status.replace("_", " "))}
                 </p>
               </div>
+
               <div>
                 <p className="text-xl font-bold">Prioridade: </p>
                 <p className="text-xl ">

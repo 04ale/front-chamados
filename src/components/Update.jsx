@@ -1,9 +1,9 @@
-import { X } from "lucide-react";
+import { Undo2, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 import api from "../services/api";
 
-function Update({ closeEdit, ticketInfo }) {
+function Update({ closeEdit, ticketInfo, handleBack }) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState("");
@@ -66,8 +66,10 @@ function Update({ closeEdit, ticketInfo }) {
       />
       <div className="max-sm:mx-[20px] sm:mx-[40px] md:mx-[60px] lg:w-[900px] max-lg:w-[600px] max-h-[80vh] overflow-auto text-white bg-[#3d1f2c] rounded-lg p-6">
         <div className="flex flex-col gap-5">
-          <div className="flex flex-row gap-2 items-center">
+          <div className="flex flex-row gap-2 items-center justify-between">
+            <Undo2 size={30} className="cursor-pointer" onClick={handleBack}/>
             <h1 className="text-2xl font-semibold">Editar Ticket</h1>
+            <p></p>
           </div>
           <form className="grid gap-4" onSubmit={updateTicket}>
             <div className="grid gap-2 ">

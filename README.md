@@ -1,5 +1,5 @@
 **Continuação**
-Dar funcionalidade aos botões de editar e excluir
+Sistema de setas, alterar status para fechado
 
 **Paleta de cores**
 Vinho profundo: #5A2C40

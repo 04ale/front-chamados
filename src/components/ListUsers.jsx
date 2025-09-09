@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import api from "../services/api";
 import { useAuth } from "../hooks/useAuth";
-import { Search, User } from "lucide-react";
+import { Search, Trash, User } from "lucide-react";
 
 function ListUsers() {
   const { user } = useAuth();
   const [users, setUsers] = useState([]);
-  
+  const [loading, setLoading] = useState(false);
 
   const capitalizeFirstLetter = (string) => {
     if (!string || string.length === 0) {
@@ -18,24 +18,54 @@ function ListUsers() {
     return firstLetter + restOfWord;
   };
 
-  useEffect(() => {
+  async function getUsers() {
     try {
-      if (user?.token) {
-        async function getUsers() {
-          const res = await api.get('/users', {
-            headers: {
-              Authorization: `Bearer ${user.token}`,
-            },
-          });
-          setUsers(res.data.users);
-        }
-        getUsers();
-      }
+      setLoading(true);
+      const res = await api.get("/users", {
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+      });
+      setUsers(res.data.users);
     } catch (error) {
       console.error("ERRO: ", error);
+    } finally {
+      setLoading(false);
     }
+  }
+
+  useEffect(() => {
+    getUsers();
+    
   }, [user]);
 
+  if (loading) {
+    return (
+      <p className="flex items-center justify-center font-bold text-4xl mt-10 text-[#5A2C40]">
+        Carregando...
+      </p>
+    );
+  }
+
+  async function delUser(userInfo) {
+    try {
+      let res = confirm(
+        `Tem certeza que deseja deletar o usuário ${userInfo.name} ?`
+      );
+      if (res) {
+        await api.delete(`/auth/${userInfo.id}/delete`, {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+        });
+      }
+      alert("Usuário deletado com sucesso!");
+      getUsers();
+    } catch (error) {
+      alert("Erro ao deletar usuário", error);
+      console.error("ERRO: ", error);
+    }
+  }
 
   return (
     <div className="">
@@ -57,7 +87,7 @@ function ListUsers() {
               <span className="w-6 h-6"></span>
             </div>
 
-            <ul className="flex flex-col">
+            <ul className="flex flex-col text-[#5A2C40]">
               {users.map((user) => (
                 <li
                   key={user.id}
@@ -65,24 +95,24 @@ function ListUsers() {
                 >
                   <div className="flex items-center gap-2 truncate">
                     <User size={16} />
-                    <p className="truncate">{capitalizeFirstLetter(user.name)}</p>
+                    <p className="truncate">
+                      {capitalizeFirstLetter(user.name)}
+                    </p>
                   </div>
 
-                  <p className="truncate">
-                    {user.email}
+                  <p className="truncate">{user.email}</p>
+
+                  <p className="max-sm:hidden">
+                    {capitalizeFirstLetter(user.role)}
                   </p>
-
-
-                  <p className="max-sm:hidden">{capitalizeFirstLetter(user.role)}</p>
 
                   <p className="max-sm:hidden">0</p>
 
-                  <button className="text-[#17A2B8] flex justify-center">
-                    <Search
+                  <button className="text-red-500 flex justify-center">
+                    <Trash
                       className="cursor-pointer"
                       size={20}
-                      onClick={() => {
-                      }}
+                      onClick={() => delUser(user)}
                     />
                   </button>
                 </li>

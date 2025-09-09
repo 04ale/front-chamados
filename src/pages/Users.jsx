@@ -7,7 +7,7 @@ function Users() {
   return (
     <div>
       <Navbar />
-      <div className="md:ml-[119px] xl:ml-[329px] max-md:pt-[40px]">
+      <div className="md:ml-[119px] xl:ml-[329px] max-md:pt-[40px] mb-14">
         <ListUsers />
       </div>
     </div>
