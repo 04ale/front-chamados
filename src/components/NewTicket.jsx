@@ -7,7 +7,7 @@ function NewTicket({ onClose }) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState("");
-  const [imageOn, setImageOn] = useState(0)
+  const [file, setFile] = useState(null)
   const { user } = useAuth();
 
   async function createTicket() {
@@ -47,7 +47,8 @@ function NewTicket({ onClose }) {
     },
     onDrop: (e) => {
       e.preventDefault();
-      console.log("onDrop")
+      setFile(e.target.files[0])
+      console.log(file)
     }
   }
 
@@ -115,7 +116,7 @@ function NewTicket({ onClose }) {
                 </h4>
                 <div class="flex items-center justify-center">
                   <label>
-                    <input type="file" hidden />
+                    <input type="file" hidden value={file} onChange={(e)=> setFile(e.target.files[0])}/>
                     <div class="flex w-28 h-9 px-2 flex-col bg-[#3d1f2c] rounded-full shadow text-white text-xs font-semibold items-center justify-center cursor-pointer focus:outline-none">
                       Escolher arquivo
                     </div>

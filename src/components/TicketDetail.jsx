@@ -119,7 +119,7 @@ function TicketDetail({
         <div className="flex flex-col gap-4 mb-10">
           <div>
             <div className="grid grid-cols-[5fr_1fr] items-center">
-              <div className="flex flex-row gap-2 items-center">
+              <div className="grid grid-cols-[auto_1fr] gap-2 items-center">
                 <User />
                 <h1 className="text-2xl font-semibold">
                   {ticketInfo.creator.name}

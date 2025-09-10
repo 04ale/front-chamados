@@ -1,5 +1,5 @@
 **Continuação**
-Sistema de setas, alterar status para fechado
+sistema de pesquisa e filtros, ajeitar layout para mobile
 
 **Paleta de cores**
 Vinho profundo: #5A2C40

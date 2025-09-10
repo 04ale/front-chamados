@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import api from "../services/api";
 import { useAuth } from "../hooks/useAuth";
 import { Search, Trash, User } from "lucide-react";
+import CountTickets from "./CountTickets";
 
 function ListUsers() {
   const { user } = useAuth();
@@ -17,6 +18,8 @@ function ListUsers() {
 
     return firstLetter + restOfWord;
   };
+
+  
 
   async function getUsers() {
     try {
@@ -93,7 +96,7 @@ function ListUsers() {
                   key={user.id}
                   className="grid sm:grid-cols-[3fr_3fr_1fr_1fr_auto] max-sm:grid-cols-[2fr_3fr_auto] max-md:px-2 divide-x-1 divide-[#8C847E] gap-4 items-center border-t border-gray-200 bg-[#FFFBF5] py-2 md:pl-3 font-semibold"
                 >
-                  <div className="flex items-center gap-2 truncate">
+                  <div className="grid grid-cols-[auto_1fr] items-center gap-2 truncate">
                     <User size={16} />
                     <p className="truncate">
                       {capitalizeFirstLetter(user.name)}
@@ -106,7 +109,7 @@ function ListUsers() {
                     {capitalizeFirstLetter(user.role)}
                   </p>
 
-                  <p className="max-sm:hidden">0</p>
+                  <CountTickets userInfo={user}/>
 
                   <button className="text-red-500 flex justify-center">
                     <Trash

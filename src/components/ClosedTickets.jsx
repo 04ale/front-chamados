@@ -16,7 +16,7 @@ import Update from "./Update";
 import SearchBar from "./SearchBar";
 import { useNavigate } from "react-router-dom";
 
-function Tickets() {
+function ClosedTickets() {
   const { user } = useAuth();
   const [currentPage, setCurrentPage] = useState(1);
   const [tickets, setTickets] = useState([]);
@@ -109,7 +109,7 @@ function Tickets() {
   async function getTickets() {
     if (user && user.token) {
       try {
-        const response = await api.get(`/tickets`, {
+        const response = await api.get(`/tickets/closed`, {
           headers: {
             Authorization: `Bearer ${user.token}`,
           },
@@ -149,8 +149,11 @@ function Tickets() {
     <div className="">
       <div className="w-full h-full flex flex-col gap-4 ">
         <div>
-          <div className="grid grid-cols-[1fr_auto] md:pl-10 max-md:pl-7 pr-5 md:pt-10 max-md:pt-7">
-            <div className=" text-[#5A2C40]" ref={screenRef}>
+          <div className="grid grid-cols-[1fr_auto] md:pl-10 max-md:pl-7 md:pt-10 pr-5 max-md:pt-7">
+            <div
+              className=" text-[#5A2C40]"
+              ref={screenRef}
+            >
               <h1 className="text-4xl font-bold ">Tickets</h1>
               <p className="text-2xl font-semibold">
                 {capitalizeFirstLetter(user?.name)}
@@ -159,9 +162,9 @@ function Tickets() {
             <div>
               <button
                 className="p-3 bg-white rounded-lg cursor-pointer"
-                onClick={() => nav("/closed")}
+                onClick={() => nav("/")}
               >
-                Ver tickets fechados
+                Ver tickets abertos
               </button>
             </div>
             <div className="flex gap-4 py-6">
@@ -289,4 +292,4 @@ function Tickets() {
   );
 }
 
-export default Tickets;
+export default ClosedTickets;
