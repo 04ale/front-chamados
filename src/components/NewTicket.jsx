@@ -7,18 +7,26 @@ function NewTicket({ onClose }) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState("");
-  const [file, setFile] = useState(null)
-  const { user } = useAuth();
+  
 
-  async function createTicket() {
+  const { user } = useAuth();
+  const status = "aberto";
+  async function createTicket(e) {
     try {
+      e.preventDefault();
+      console.log({
+        title,
+        description,
+        priority,
+        status,
+      });
       await api.post(
         "/tickets",
         {
           title,
           description,
           priority,
-          status: open,
+          status,
         },
         {
           headers: {
@@ -32,32 +40,42 @@ function NewTicket({ onClose }) {
     }
   }
 
-  const dragEvents = {
-    onDragEnter: (e) => {
-      e.preventDefault();
-      console.log("onDragEnter")
-    },
-    onDragLeave: (e) => {
-      e.preventDefault();
-      console.log("onDragLeave")
-    },
-    onDragOver: (e) => {
-      e.preventDefault();
-      console.log("onDragOver")
-    },
-    onDrop: (e) => {
-      e.preventDefault();
-      setFile(e.target.files[0])
-      console.log(file)
-    }
-  }
+  const handleDrop = (e) => {
+    e.preventDefault();
 
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      setFile(e.dataTransfer.files[0]);
+      console.log("Arquivo solto:", e.dataTransfer.files[0]);
+      e.dataTransfer.clearData();
+      setFiles([...files, file]);
+      console.log("FILES:", files);
+    }
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+  };
+
+  const handleFileChange = (e) => {
+    e.preventDefault()
+    if (e.target.files && e.target.files[0]) {
+      const selectedFile = e.target.files[0];
+      setFile(selectedFile);
+      console.log("FILE", selectedFile);
+      setFiles(prevFiles => [...prevFiles, selectedFile]);
+    }
+  };
+
+  useEffect(() => {
+    console.log("Estado FILES atualizado:", files);
+}, [files]);
   useEffect(() => {
     console.log(priority);
   }, [priority]);
 
+
   return (
-    <div className="h-screen w-screen fixed bg-black/60 flex justify-center items-center">
+    <div className="h-screen w-screen fixed bg-black/60 flex justify-center items-center z-50">
       <X
         onClick={onClose}
         className="absolute top-0 right-0 text-white mt-5 mr-5 font-bold cursor-pointer max-md:mt-17"
@@ -83,7 +101,7 @@ function NewTicket({ onClose }) {
           <div className="grid gap-2 ">
             <label className="text-sm font-medium "> Descrição</label>
             <textarea
-              className="w-full rounded-md p-2 bg-[#5A2C40] text-white focus:outline-none  text-sm"
+              className="w-full rounded-md p-2 bg-[#5A2C40] text-white focus:outline-none text-sm"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
             />
@@ -92,8 +110,10 @@ function NewTicket({ onClose }) {
             <label className="text-sm font-medium  "> Prioridade</label>
             <select
               value={priority}
-              onChange={(e) => setPriority(e.target.value)}
-              className="w-full rounded-md p-2 bg-[#5A2C40] text-white focus:outline-none  text-sm"
+              onChange={(e) => {
+                setPriority(e.target.value);
+              }}
+              className="w-full rounded-md p-2 bg-[#5A2C40] text-white focus:outline-none text-sm"
             >
               <option value="low" className="rounded-lg">
                 Baixa
@@ -102,22 +122,27 @@ function NewTicket({ onClose }) {
               <option value="high">Alta</option>
             </select>
           </div>
-          <div  className="flex flex-col gap-2 text-sm">
+
+          <div className="flex flex-col gap-2 text-sm">
             <p className="text-sm font-medium">Imagem</p>
-            <div {...dragEvents} class="w-full py-2 bg-[#5A2C40] rounded-lg text-white gap-3 grid">
-              <div class="grid gap-1">
-                <h2 class="text-center text-gray-400 text-xs">
+            <div
+              onDrop={handleDrop}
+              onDragOver={handleDragOver}
+              className="w-full py-2 bg-[#5A2C40] rounded-lg text-white gap-3 grid"
+            >
+              <div className="grid gap-1">
+                <h2 className="text-center text-gray-400 text-xs">
                   PNG, JPG or PDF
                 </h2>
               </div>
-              <div class="grid gap-2">
-                <h4 class="text-center text-sm font-medium">
+              <div className="grid gap-2">
+                <h4 className="text-center text-sm font-medium">
                   Arraste seus arquivos aqui
                 </h4>
-                <div class="flex items-center justify-center">
+                <div className="flex items-center justify-center">
                   <label>
-                    <input type="file" hidden value={file} onChange={(e)=> setFile(e.target.files[0])}/>
-                    <div class="flex w-28 h-9 px-2 flex-col bg-[#3d1f2c] rounded-full shadow text-white text-xs font-semibold items-center justify-center cursor-pointer focus:outline-none">
+                    <input type="file" hidden onChange={handleFileChange} />
+                    <div className="flex w-28 h-9 px-2 flex-col bg-[#3d1f2c] rounded-full shadow text-white text-xs font-semibold items-center justify-center cursor-pointer focus:outline-none">
                       Escolher arquivo
                     </div>
                   </label>

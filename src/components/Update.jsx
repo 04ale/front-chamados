@@ -58,7 +58,7 @@ function Update({ closeEdit, ticketInfo, handleBack }) {
   }
 
   return (
-    <div className="h-screen w-screen fixed top-0 left-0 bg-black/60 flex justify-center items-center">
+    <div className="h-screen w-screen fixed top-0 left-0 bg-black/60 flex justify-center items-center z-50">
       <X
         onClick={closeEdit}
         className="absolute top-0 right-0 text-white mt-5 mr-5 font-bold cursor-pointer max-md:mt-17"

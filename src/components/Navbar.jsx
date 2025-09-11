@@ -184,7 +184,7 @@ function Navbar() {
           </div>
         </div>
       </div>
-      {isModalOpen && <NewTicket onClose={closeModal} />}
+      {isModalOpen && <NewTicket onClose={closeModal}/>}
     </nav>
   );
 }

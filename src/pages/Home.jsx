@@ -1,12 +1,14 @@
-import React from "react";
 import Navbar from "../components/Navbar";
 import Tickets from "../components/Tickets";
+import { useState } from "react";
 
 function Home() {
+
+
   return (
     <div >
       <Navbar />
-      <div className="md:ml-[119px] xl:ml-[336px] max-md:pt-[40px]">
+      <div className="md:ml-[119px] xl:ml-[336px] max-md:py-[40px] md:pb-[40px]">
         <Tickets />
         
       </div>

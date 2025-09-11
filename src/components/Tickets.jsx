@@ -12,51 +12,45 @@ import {
 import TicketDetail from "./TicketDetail";
 import Comments from "./Comments";
 import Update from "./Update";
-
 import SearchBar from "./SearchBar";
 import { useNavigate } from "react-router-dom";
+import Filters from "./Filters";
 
 function Tickets() {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const [currentPage, setCurrentPage] = useState(1);
-  const [tickets, setTickets] = useState([]);
-  const [ticket, setTicket] = useState([]);
+  const [allTicketsFromApi, setAllTicketsFromApi] = useState([]);
+  const [displayedTickets, setDisplayedTickets] = useState([]);
+  const [ticket, setTicket] = useState(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [isCommentsOpen, setIsCommentsOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
-  const [pagination, setPagination] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [pagination, setPagination] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [selectedId, setSelectedId] = useState("");
+  const [status, setStatus] = useState("");
+  const [priority, setPriority] = useState("");
+  const [inputValue, setInputValue] = useState("");
+
   const nav = useNavigate();
   const screenRef = useRef();
 
   function getPriorityInfo(priority) {
     switch (priority) {
       case "low":
-        return {
-          text: "Baixa",
-          className: "text-green-500",
-        };
+        return { text: "Baixa", className: "text-green-500" };
       case "medium":
-        return {
-          text: "Media",
-          className: "text-yellow-500",
-        };
+        return { text: "Média", className: "text-yellow-500" };
       case "high":
-        return {
-          text: "Alta",
-          className: "text-red-500 font-bold",
-        };
+        return { text: "Alta", className: "text-red-500 font-bold" };
       default:
-        return {
-          text: priority || "N/A",
-          className: "text-gray-500",
-        };
+        return { text: priority || "N/A", className: "text-gray-500" };
     }
   }
 
   const handleTicketDeleted = (deletedTicketId) => {
-    setTickets((currentTickets) =>
-      currentTickets.filter((ticket) => ticket.id !== deletedTicketId)
+    setAllTicketsFromApi((currentTickets) =>
+      currentTickets.filter((t) => t.id !== deletedTicketId)
     );
   };
 
@@ -65,39 +59,29 @@ function Tickets() {
     setIsCommentsOpen(false);
     setIsEditOpen(false);
   };
-
   const closeDetails = () => {
     setIsDetailsOpen(false);
   };
-
   const openComments = () => {
     setIsDetailsOpen(false);
     setIsCommentsOpen(true);
     setIsEditOpen(false);
   };
-
   const closeComments = () => {
     setIsCommentsOpen(false);
   };
-
   const openEdit = () => {
     setIsDetailsOpen(false);
     setIsCommentsOpen(false);
     setIsEditOpen(true);
   };
-
   const closeEdit = () => {
     setIsEditOpen(false);
   };
 
   const capitalizeFirstLetter = (string) => {
-    if (!string || string.length === 0) {
-      return "";
-    }
-    const firstLetter = string.charAt(0).toUpperCase();
-    const restOfWord = string.slice(1);
-
-    return firstLetter + restOfWord;
+    if (!string || string.length === 0) return "";
+    return string.charAt(0).toUpperCase() + string.slice(1);
   };
 
   const handleBack = () => {
@@ -106,36 +90,59 @@ function Tickets() {
     setIsEditOpen(false);
   };
 
-  async function getTickets() {
-    if (user && user.token) {
-      try {
-        const response = await api.get(`/tickets`, {
-          headers: {
-            Authorization: `Bearer ${user.token}`,
-          },
-          params: {
-            page: currentPage,
-          },
-        });
-        setPagination(response.data.pagination);
-        setTickets(response.data.tickets);
-      } catch (error) {
-        console.error("ERRO: ", error);
-      } finally {
-        setLoading(false);
-      }
+  async function fetchTicketsFromApi() {
+    if (!user?.token) return;
+    setLoading(true);
+
+    try {
+      const params = {
+        page: currentPage,
+        status: status || undefined,
+        priority: priority || undefined,
+        selectedId: selectedId || undefined,
+      };
+
+      const response = await api.get(`/tickets/filtered`, {
+        headers: { Authorization: `Bearer ${user.token}` },
+        params: params,
+      });
+
+      setAllTicketsFromApi(response.data.tickets || []);
+      setPagination(response.data.pagination || {});
+    } catch (error) {
+      console.error("ERRO ao buscar tickets:", error);
+    } finally {
+      setLoading(false);
     }
   }
 
   useEffect(() => {
-    getTickets();
-  }, [user, currentPage]);
+    fetchTicketsFromApi();
+  }, [user?.token, currentPage, status, priority, selectedId]);
+
+  useEffect(() => {
+    const lowerCaseInputValue = inputValue.toLowerCase(); 
+    if (inputValue) {
+      const filtered = allTicketsFromApi.filter(ticket => 
+        ticket.title.toLowerCase().includes(lowerCaseInputValue) ||
+        (ticket.creator && ticket.creator.name.toLowerCase().includes(lowerCaseInputValue)) ||
+        (ticket.creator && ticket.creator.email.toLowerCase().includes(lowerCaseInputValue))
+      );
+      setDisplayedTickets(filtered);
+    } else {
+      setDisplayedTickets(allTicketsFromApi);
+    }
+  }, [allTicketsFromApi, inputValue]);
 
   useEffect(() => {
     if (!loading && screenRef.current) {
       screenRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
     }
-  }, [tickets]);
+  }, [displayedTickets]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+  };
 
   if (loading) {
     return (
@@ -149,23 +156,42 @@ function Tickets() {
     <div className="">
       <div className="w-full h-full flex flex-col gap-4 ">
         <div>
-          <div className="grid grid-cols-[1fr_auto] md:pl-10 max-md:pl-7 pr-5 md:pt-10 max-md:pt-7">
-            <div className=" text-[#5A2C40]" ref={screenRef}>
-              <h1 className="text-4xl font-bold ">Tickets</h1>
-              <p className="text-2xl font-semibold">
-                {capitalizeFirstLetter(user?.name)}
-              </p>
+          <div className=" w-full md:px-10 max-md:px-7 pr-5 md:pt-10 max-md:pt-7">
+            <div className="grid grid-cols-[1fr_auto]">
+              <div className=" text-[#5A2C40]" ref={screenRef}>
+                <h1 className="text-4xl font-bold ">Tickets</h1>
+                <p className="text-2xl font-semibold">
+                  {capitalizeFirstLetter(user?.name)}
+                </p>
+              </div>
+              <div>
+                {isAdmin && (
+                  <button
+                    className="p-3 border border-[#5A2C40]/20 bg-[#FFFBF5] font-semibold text-[#5A2C40] rounded-lg cursor-pointer"
+                    onClick={() => nav("/closed")}
+                  >
+                    Ver tickets fechados
+                  </button>
+                )}
+              </div>
             </div>
-            <div>
-              <button
-                className="p-3 bg-white rounded-lg cursor-pointer"
-                onClick={() => nav("/closed")}
-              >
-                Ver tickets fechados
-              </button>
-            </div>
-            <div className="flex gap-4 py-6">
-              <SearchBar />
+            <div className="flex gap-4 w-full py-6">
+              <div className="grid 2xl:grid-cols-[1fr_1fr] max-2xl:gap-2 2xl:gap-10 w-full">
+                <SearchBar
+                  inputValue={inputValue}
+                  setInputValue={setInputValue}
+                />
+                <Filters
+                  selectedId={selectedId}
+                  setSelectedId={setSelectedId}
+                  priority={priority}
+                  setPriority={setPriority}
+                  status={status}
+                  setStatus={setStatus}
+                  handleSubmit={handleSubmit}
+                  className="w-1/2"
+                />
+              </div>
             </div>
           </div>
           <div className="border-b border-[#8C847E]">
@@ -178,53 +204,64 @@ function Tickets() {
               <span className="w-6 h-6"></span>
             </div>
 
-            <ul className="flex flex-col text-[#5A2C40]">
-              {tickets.map((ticket) => {
-                const priorityInfo = getPriorityInfo(ticket.priority);
-                return (
-                  <li
-                    key={ticket.id}
-                    className="grid lg:grid-cols-[2fr_3fr_3fr_1fr_1fr_auto] max-lg:grid-cols-[2fr_3fr_1fr_auto] max-sm:grid-cols-[2fr_3fr_auto] max-md:px-2 md:px-4 divide-x-1 divide-[#8C847E] gap-4 items-center border-t border-gray-200 bg-[#FFFBF5] py-2 font-semibold"
-                  >
-                    <div className="grid grid-cols-[auto_1fr] items-center gap-2 truncate">
-                      <User size={16} />
-                      <p className="truncate">
-                        {capitalizeFirstLetter(ticket.creator.name)}
+            {displayedTickets.length > 0 ? (
+              <ul className="flex flex-col text-[#5A2C40]">
+                {displayedTickets.map((ticketItem) => {
+                  const priorityInfo = getPriorityInfo(ticketItem.priority);
+                  return (
+                    <li
+                      key={ticketItem.id}
+                      className="grid lg:grid-cols-[2fr_3fr_3fr_1fr_1fr_auto] max-lg:grid-cols-[2fr_3fr_1fr_auto] max-sm:grid-cols-[2fr_3fr_auto] max-md:px-2 md:px-4 divide-x-1 divide-[#8C847E] gap-4 items-center border-t border-gray-200 bg-[#FFFBF5] py-2 font-semibold"
+                    >
+                      <div className="grid grid-cols-[auto_1fr] items-center gap-2 truncate">
+                        <User size={16} />
+                        <p className="truncate">
+                          {capitalizeFirstLetter(ticketItem.creator.name)}
+                        </p>
+                      </div>
+
+                      <p className="truncate max-lg:hidden">
+                        {ticketItem.creator.email}
                       </p>
-                    </div>
 
-                    <p className="truncate max-lg:hidden">
-                      {ticket.creator.email}
-                    </p>
+                      <p className="truncate">
+                        {capitalizeFirstLetter(ticketItem.title)}
+                      </p>
 
-                    <p className="truncate">
-                      {capitalizeFirstLetter(ticket.title)}
-                    </p>
+                      <p className="max-lg:hidden">
+                        {capitalizeFirstLetter(
+                          ticketItem.status.replace("_", " ")
+                        )}
+                      </p>
 
-                    <p className="max-lg:hidden">
-                      {capitalizeFirstLetter(ticket.status.replace("_", " "))}
-                    </p>
+                      <p className={`max-sm:hidden ${priorityInfo.className}`}>
+                        {priorityInfo.text}
+                      </p>
 
-                    <p className={`max-sm:hidden ${priorityInfo.className}`}>
-                      {priorityInfo.text}
-                    </p>
-
-                    <button className="text-[#8B4571] flex justify-center">
-                      <Search
-                        className="cursor-pointer"
-                        size={20}
-                        onClick={() => {
-                          openDetails();
-                          setTicket(ticket);
-                        }}
-                      />
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
+                      <button className="text-[#8B4571] flex justify-center">
+                        <Search
+                          className="cursor-pointer"
+                          size={20}
+                          onClick={() => {
+                            openDetails();
+                            setTicket(ticketItem);
+                          }}
+                        />
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : (
+              !loading && (
+                <p className="text-center py-4 text-gray-500">
+                  Nenhum ticket encontrado.
+                </p>
+              )
+            )}
           </div>
         </div>
+
         <div className="justify-between items-center flex flex-row px-8 gap-4 mt-2">
           {currentPage !== 1 && (
             <div className="flex gap-4">
@@ -241,7 +278,7 @@ function Tickets() {
             </div>
           )}
 
-          {tickets.length > 29 && (
+          {pagination.total > currentPage * 30 && (
             <div className="w-full flex justify-between">
               <p></p>
               <div className="flex gap-4">
@@ -267,6 +304,7 @@ function Tickets() {
           openEdit={openEdit}
           ticketInfo={ticket}
           onTicketDeleted={handleTicketDeleted}
+          
         />
       )}
       {isCommentsOpen && (

@@ -42,6 +42,7 @@ function TicketDetail({
     if (ticketInfo.id) {
       getTicket(ticketInfo.id);
     }
+    console.log(file, files)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ticketInfo.id]);
 
@@ -108,7 +109,7 @@ function TicketDetail({
   }
 
   return (
-    <div className="h-screen w-screen fixed top-0 left-0 bg-black/60 flex justify-center items-center">
+    <div className="h-screen w-screen fixed top-0 left-0 bg-black/60 flex justify-center items-center z-50">
       <X
         onClick={closeDetails}
         className="absolute top-0 right-0 text-white mt-5 mr-5 font-bold cursor-pointer max-md:mt-17"
@@ -164,6 +165,13 @@ function TicketDetail({
               </div>
             </div>
           </div>
+          <ul className="w-full flex justify-around">
+            {files.map((item)=> (
+              <li key={item.id}>
+                <p>{item.file.name}</p>
+              </li>
+            ))}
+          </ul>
         </div>
         {isAdmin ? (
           <div className="grid grid-cols-[1fr_1fr_1fr] gap-3">

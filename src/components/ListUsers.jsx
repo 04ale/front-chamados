@@ -19,8 +19,6 @@ function ListUsers() {
     return firstLetter + restOfWord;
   };
 
-  
-
   async function getUsers() {
     try {
       setLoading(true);
@@ -39,7 +37,6 @@ function ListUsers() {
 
   useEffect(() => {
     getUsers();
-    
   }, [user]);
 
   if (loading) {
@@ -61,9 +58,9 @@ function ListUsers() {
             Authorization: `Bearer ${user.token}`,
           },
         });
+        alert("Usuário deletado com sucesso!");
+        getUsers();
       }
-      alert("Usuário deletado com sucesso!");
-      getUsers();
     } catch (error) {
       alert("Erro ao deletar usuário", error);
       console.error("ERRO: ", error);
@@ -94,7 +91,7 @@ function ListUsers() {
               {users.map((user) => (
                 <li
                   key={user.id}
-                  className="grid sm:grid-cols-[3fr_3fr_1fr_1fr_auto] max-sm:grid-cols-[2fr_3fr_auto] max-md:px-2 divide-x-1 divide-[#8C847E] gap-4 items-center border-t border-gray-200 bg-[#FFFBF5] py-2 md:pl-3 font-semibold"
+                  className="grid sm:grid-cols-[3fr_3fr_1fr_1fr_auto] max-sm:grid-cols-[2fr_3fr_auto] px-3 max-md:px-2 divide-x-1 divide-[#8C847E] gap-4 items-center border-t border-gray-200 bg-[#FFFBF5] py-2 md:pl-3 font-semibold"
                 >
                   <div className="grid grid-cols-[auto_1fr] items-center gap-2 truncate">
                     <User size={16} />
@@ -109,7 +106,7 @@ function ListUsers() {
                     {capitalizeFirstLetter(user.role)}
                   </p>
 
-                  <CountTickets userInfo={user}/>
+                  <CountTickets userInfo={user} />
 
                   <button className="text-red-500 flex justify-center">
                     <Trash

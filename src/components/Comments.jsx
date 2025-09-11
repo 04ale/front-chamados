@@ -61,6 +61,18 @@ function Comments({
   }
 
   {
+    function getPriorityInfo(priority) {
+      switch (priority) {
+        case "low":
+          return { text: "Baixa", className: "text-green-500" };
+        case "medium":
+          return { text: "Média", className: "text-yellow-500" };
+        case "high":
+          return { text: "Alta", className: "text-red-500 font-bold" };
+        default:
+          return { text: priority || "N/A", className: "text-gray-500" };
+      }
+    }
     /** async function deleteComment(id) {
     try {
       let res = confirm("Tem certeza que deseja deletar esse comentário? ");
@@ -105,8 +117,28 @@ function Comments({
     }
   };
 
+  function getStatusInfo(status) {
+    switch (status) {
+      case "aberto": return { text: "Aberto", className: "text-green-700 bg-green-100 font-semibold" };
+      case "em_andamento": return { text: "Em andamento", className: "text-yellow-700 bg-yellow-100 font-semibold" };
+      case "fechado": return { text: "Fechado", className: "text-red-700 bg-red-100 font-semibold" };
+      default: return { text: status || "N/A", className: "text-gray-500 bg-gray-100" };
+    }
+  }
+  const statusInfo = getStatusInfo(ticketInfo.status);
+
+  function getPriorityInfo(priority) {
+    switch (priority) {
+      case "low": return { text: "Baixa", className: "text-green-700 bg-green-100 font-semibold" };
+      case "medium": return { text: "Média", className: "text-yellow-700 bg-yellow-100 font-semibold" };
+      case "high": return { text: "Alta", className: "text-red-700 bg-red-100 font-bold" };
+      default: return { text: priority || "N/A", className: "text-gray-500 bg-gray-100" };
+    }
+  }
+  const priorityInfo = getPriorityInfo(ticketInfo.priority);
+
   return (
-    <div className="h-screen w-screen fixed top-0 left-0 bg-black/60 flex justify-end">
+    <div className="h-screen w-screen fixed top-0 left-0 bg-black/60 flex justify-end z-50">
       <div className="h-screen overflow-auto w-[800px] text-[#5A2C40] max-md:py-17 bg-[#FFFBF5] p-6">
         <div className="flex flex-col items-center gap-4">
           <div className="flex flex-col gap-5 center w-full">
@@ -121,11 +153,11 @@ function Comments({
               </div>
             </div>
             <div className="flex gap-2 text-sm">
-              <p className="py-1 px-2 bg-[#5A2C40]/40 text-[#5A2C40] font-semibold rounded-full">
-                {ticketInfo.status}
+              <p className={`py-1 px-2 bg-[#5A2C40]/40 ${statusInfo.className} text-[#5A2C40] font-semibold rounded-full`}>
+                {statusInfo.text}
               </p>
-              <p className="py-1 px-2 bg-[#5A2C40]/40 text-[#5A2C40] font-semibold rounded-full">
-                {ticketInfo.priority}
+              <p className={`py-1 px-2 ${priorityInfo.className} rounded-full`}>
+                {priorityInfo.text}
               </p>
             </div>
             <div className="text-sm grid grid-cols-[2fr_1fr] gap-4">
@@ -211,7 +243,7 @@ function Comments({
 
               return (
                 <li
-                key={comment.id}
+                  key={comment.id}
                   className={`flex w-full ${
                     isCurrentUser ? "justify-end" : "justify-start"
                   }`}
