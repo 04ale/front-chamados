@@ -2,29 +2,48 @@ import { X } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import api from "../services/api";
 import { useAuth } from "../hooks/useAuth";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { v4 } from "uuid";
+import { storage } from "../services/firebaseConfig";
 
 function NewTicket({ onClose }) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [priority, setPriority] = useState("");
-  
+  const [priority, setPriority] = useState("low");
+  const [files, setFiles] = useState([]);
 
   const { user } = useAuth();
   const status = "aberto";
+
   async function createTicket(e) {
+    e.preventDefault();
     try {
-      e.preventDefault();
+      const id = v4()
+      const filesUrls = await Promise.all(
+        files.map(async (file) => {
+          const imageRef = ref(storage, `tickets/${id}/${file.name}`);
+          await uploadBytes(imageRef, file);
+          return await getDownloadURL(imageRef);
+        })
+      );
+
+      console.log(filesUrls)
+
       console.log({
+
         title,
         description,
+        files: filesUrls,
         priority,
         status,
       });
       await api.post(
         "/tickets",
         {
+          id,
           title,
           description,
+          files: filesUrls,
           priority,
           status,
         },
@@ -35,44 +54,54 @@ function NewTicket({ onClose }) {
         }
       );
       alert("Ticket criado com sucesso!");
+      onClose()
+      window.location.reload()
     } catch (error) {
+      alert("Erro ao criar o ticket, tente novamente");
       console.log("ERRO: ", error);
     }
   }
 
   const handleDrop = (e) => {
     e.preventDefault();
-
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      setFile(e.dataTransfer.files[0]);
-      console.log("Arquivo solto:", e.dataTransfer.files[0]);
-      e.dataTransfer.clearData();
-      setFiles([...files, file]);
-      console.log("FILES:", files);
+    if (e.dataTransfer.files) {
+      const newFiles = Array.from(e.dataTransfer.files);
+      if (files.length + newFiles.length > 3) {
+        alert("Você pode anexar no máximo 3 arquivos.");
+        return;
+      }
+      setFiles((prevFiles) => [...prevFiles, ...newFiles]);
     }
   };
 
   const handleDragOver = (e) => {
     e.preventDefault();
+    console.log('handleDragOver')
+    
   };
 
   const handleFileChange = (e) => {
-    e.preventDefault()
-    if (e.target.files && e.target.files[0]) {
-      const selectedFile = e.target.files[0];
-      setFile(selectedFile);
-      console.log("FILE", selectedFile);
-      setFiles(prevFiles => [...prevFiles, selectedFile]);
+    if (e.target.files) {
+      const newFiles = Array.from(e.target.files);
+      if (files.length + newFiles.length > 3) {
+        alert("Você pode anexar no máximo 3 arquivos.");
+        return;
+      }
+      setFiles((prevFiles) => [...prevFiles, ...newFiles]);
     }
+  };
+
+  const handleRemoveFile = (indexToRemove) => {
+    setFiles((prevFiles) => prevFiles.filter((_, index) => index !== indexToRemove));
   };
 
   useEffect(() => {
     console.log("Estado FILES atualizado:", files);
-}, [files]);
+  }, [files]);
+
   useEffect(() => {
     console.log(priority);
   }, [priority]);
-
 
   return (
     <div className="h-screen w-screen fixed bg-black/60 flex justify-center items-center z-50">
@@ -81,7 +110,7 @@ function NewTicket({ onClose }) {
         className="absolute top-0 right-0 text-white mt-5 mr-5 font-bold cursor-pointer max-md:mt-17"
         size={40}
       />
-      <div className="max-sm:w-[340px] sm:w-[450px] mx-auto h-[610px] text-white bg-[#3d1f2c] rounded-lg p-6">
+      <div className="max-sm:w-[340px] sm:w-[450px] mx-auto text-white bg-[#3d1f2c] rounded-lg p-6">
         <div className="flex flex-col  mb-10">
           <h1 className="text-2xl font-bold ">Criar Ticket</h1>
           <p className="text-sm text-[#c4bab3]">
@@ -112,6 +141,7 @@ function NewTicket({ onClose }) {
               value={priority}
               onChange={(e) => {
                 setPriority(e.target.value);
+                console.log(priority);
               }}
               className="w-full rounded-md p-2 bg-[#5A2C40] text-white focus:outline-none text-sm"
             >
@@ -126,13 +156,13 @@ function NewTicket({ onClose }) {
           <div className="flex flex-col gap-2 text-sm">
             <p className="text-sm font-medium">Imagem</p>
             <div
-              onDrop={handleDrop}
-              onDragOver={handleDragOver}
               className="w-full py-2 bg-[#5A2C40] rounded-lg text-white gap-3 grid"
+              onDragOver={handleDragOver}
+              onDrop={handleDrop}
             >
               <div className="grid gap-1">
                 <h2 className="text-center text-gray-400 text-xs">
-                  PNG, JPG or PDF
+                  No máximo 3 imagens
                 </h2>
               </div>
               <div className="grid gap-2">
@@ -149,6 +179,25 @@ function NewTicket({ onClose }) {
                 </div>
               </div>
             </div>
+            {files && (
+              <div className="mt-2 flex flex-col gap-2">
+                {files.map((file, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between bg-[#5A2C40] p-2 rounded"
+                  >
+                    <span className="text-xs truncate">{file.name}</span>
+                    <button
+                      type="button"
+                      className="text-red-400 hover:text-red-600 cursor-pointer"
+                      onClick={()=>handleRemoveFile(index)}
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
           <button
             type="submit"

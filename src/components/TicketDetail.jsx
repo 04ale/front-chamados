@@ -3,8 +3,11 @@ import { useState, useEffect } from "react";
 import api from "../services/api";
 import { useAuth } from "../hooks/useAuth";
 import { User, X } from "lucide-react";
+import { storage } from "../services/firebaseConfig";
+import { ref, listAll, getDownloadURL } from "firebase/storage";
 import Comments from "./Comments";
 import Update from "./Update";
+import PhotoDetail from "./PhotoDetail";
 
 function TicketDetail({
   closeDetails,
@@ -15,7 +18,35 @@ function TicketDetail({
 }) {
   const { user, isAdmin } = useAuth();
   const [ticket, setTicket] = useState(null);
+  const [imageUrls, setImageUrls] = useState([]);
   const [loading, setLoading] = useState(true);
+    const [imageUrl, setImageUrl] = useState([]);
+
+  const [isImageOpen, setIsImageOpen] = useState(false)
+  const listRef = ref(storage, `/tickets/${ticketInfo.id}`);
+
+  useEffect(() => {
+    
+
+    listAll(listRef)
+      .then((res) => {
+        
+        const images = res.items.map((item)=> getDownloadURL(item))
+        Promise.all(images)
+        .then((urls) => {
+          setImageUrls(urls)
+          console.log("URLS", urls)
+        })
+        .catch((error)=> {
+          console.log("ERRO: ", error)
+        })
+      })
+      .catch((error) => {
+        alert("Erro")
+        console.error("ERRO: ", error)
+      });
+
+  }, [ticketInfo.id]);
 
   const capitalizeFirstLetter = (string) => {
     if (!string || string.length === 0) {
@@ -41,8 +72,8 @@ function TicketDetail({
   useEffect(() => {
     if (ticketInfo.id) {
       getTicket(ticketInfo.id);
+      getImages(ticketInfo.id);
     }
-    console.log(file, files)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ticketInfo.id]);
 
@@ -75,12 +106,36 @@ function TicketDetail({
           },
         });
         setTicket(response.data);
+        console.log(response.data);
       } catch (error) {
         console.error("ERRO: ", error);
       } finally {
         setLoading(false);
       }
     }
+  }
+
+  async function getImages(id) {
+    try {
+      const res = await api.get(`/files/${id}`, {
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+      });
+      console.log(res);
+    } catch (error) {
+      alert("Erro ao adicionar imagem.");
+      console.error("ERRO: ", error);
+    }
+  }
+
+  function openImage(image){
+    setIsImageOpen(true)
+    setImageUrl(image)
+  }
+
+  function closeImage(){
+    setIsImageOpen(false)
   }
 
   function change(info) {
@@ -101,15 +156,13 @@ function TicketDetail({
   if (loading) {
     return (
       <div className="h-screen w-screen fixed ... flex justify-center items-center">
-        <div className="... bg-white rounded-lg p-6">
-          Carregando detalhes do ticket...
-        </div>
+        <div className="">Carregando detalhes do ticket...</div>
       </div>
     );
   }
 
   return (
-    <div className="h-screen w-screen fixed top-0 left-0 bg-black/60 flex justify-center items-center z-50">
+    <div className="h-screen w-screen fixed top-0 left-0 bg-black/60 flex justify-center items-center z-30">
       <X
         onClick={closeDetails}
         className="absolute top-0 right-0 text-white mt-5 mr-5 font-bold cursor-pointer max-md:mt-17"
@@ -165,12 +218,17 @@ function TicketDetail({
               </div>
             </div>
           </div>
-          <ul className="w-full flex justify-around">
-            {files.map((item)=> (
-              <li key={item.id}>
-                <p>{item.file.name}</p>
+
+          <ul className="w-full flex sm:flex-row max-sm:flex-col gap-2 justify-around">
+            {imageUrls.map((image, index)=> (
+              <li key={index} onClick={(index)=> {
+                openImage(image)
+                console.log("TESTE: ", index)
+              }} className="flex flex-row justify-around w-full gap-2">
+                <img src={image} className="border border-gray-300 space-x-1 rounded-lg w-[280px] lg:h-[280px] md:h-[240px] sm:h-[200px] max-sm:h-[250px]"/>
               </li>
             ))}
+              
           </ul>
         </div>
         {isAdmin ? (
@@ -207,6 +265,7 @@ function TicketDetail({
           </div>
         )}
       </div>
+      {isImageOpen && <PhotoDetail onClose={closeImage} image={imageUrl}/>}
     </div>
   );
 }
