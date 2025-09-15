@@ -11,6 +11,10 @@ import {
 import { useEffect, useState, useRef } from "react";
 import api from "../services/api";
 import { useAuth } from "../hooks/useAuth";
+import CommentItem from "./CommentItem";
+
+import { storage } from "../services/firebaseConfig";
+import { uploadBytes, ref } from "firebase/storage";
 
 function Comments({
   closeComments,
@@ -22,10 +26,9 @@ function Comments({
   const [comments, setComments] = useState([]);
   const [openComments, setOpenComments] = useState(false);
   const [body, setBody] = useState("");
-  const [imageFile, setImageFile] = useState([]);
-  const [previewUrl, setPreviewUrl] = useState();
+  const [files, setFiles] = useState([]);
   const formRef = useRef(null);
-  const { user, isAdmin } = useAuth();
+  const { user } = useAuth();
 
   async function getComments() {
     const res = await api.get(`/tickets/${ticketId}/comments`, {
@@ -43,37 +46,51 @@ function Comments({
 
   async function createComment(e) {
     e.preventDefault();
-    await api.post(
-      `/tickets/${ticketId}/comments`,
-      {
-        body,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${user.token}`,
-        },
+
+    if (!body.trim() && files.length === 0) {
+      alert("Por favor escreva um comentário.");
+      return;
+    }
+
+    try {
+      const res = await api.post(
+        `/tickets/${ticketId}/comments`,
+        { body }, 
+        {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+        }
+      );
+      const newCommentId = res.data.id;
+
+      if (files.length > 0) {
+        try {
+          const uploadPromises = files.map((file) => {
+          const fileRef = ref(
+            storage,
+            `/tickets/comments/${newCommentId}/${file.name}`
+          );
+          return uploadBytes(fileRef, file);
+        });
+        await Promise.all(uploadPromises);
+        } catch (error) {
+          console.error("ERRO UPLOAD: ", error)
+        }
+        
       }
-    );
-    alert("Comentário adicionado com sucesso! ");
-    setOpenComments(false);
-    setBody("");
-    getComments();
+
+      alert("Comentário adicionado com sucesso!");
+      setBody("");
+      setFiles([]); 
+      getComments();
+    } catch (error) {
+      console.error("Erro ao criar comentário:", error);
+      alert("Ocorreu um erro ao enviar o comentário.");
+    }
   }
 
-  {
-    function getPriorityInfo(priority) {
-      switch (priority) {
-        case "low":
-          return { text: "Baixa", className: "text-green-500" };
-        case "medium":
-          return { text: "Média", className: "text-yellow-500" };
-        case "high":
-          return { text: "Alta", className: "text-red-500 font-bold" };
-        default:
-          return { text: priority || "N/A", className: "text-gray-500" };
-      }
-    }
-    /** async function deleteComment(id) {
+  /** async function deleteComment(id) {
     try {
       let res = confirm("Tem certeza que deseja deletar esse comentário? ");
       if (res) {
@@ -90,7 +107,6 @@ function Comments({
     }
   }
 */
-  }
 
   const dataISO = ticketInfo.created_at;
   const data = new Date(dataISO);
@@ -110,32 +126,71 @@ function Comments({
   }, [openComments]);
 
   const handleImageChange = (e) => {
-    if (e.target.files[0]) {
-      const file = e.target.files[0];
-      setImageFile(file);
-      setPreviewUrl(URL.createObjectURL(file));
+    if (e.target.files) {
+      const newFiles = Array.from(e.target.files);
+      if (files.length + newFiles.length > 3) {
+        alert("Você pode anexar no máximo 3 arquivos.");
+        return;
+      }
+      setFiles((prevFiles) => [...prevFiles, ...newFiles]);
+      console.log(newFiles);
     }
   };
 
   function getStatusInfo(status) {
     switch (status) {
-      case "aberto": return { text: "Aberto", className: "text-green-700 bg-green-100 font-semibold" };
-      case "em_andamento": return { text: "Em andamento", className: "text-yellow-700 bg-yellow-100 font-semibold" };
-      case "fechado": return { text: "Fechado", className: "text-red-700 bg-red-100 font-semibold" };
-      default: return { text: status || "N/A", className: "text-gray-500 bg-gray-100" };
+      case "aberto":
+        return {
+          text: "Aberto",
+          className: "text-green-700 bg-green-100 font-semibold",
+        };
+      case "em_andamento":
+        return {
+          text: "Em andamento",
+          className: "text-yellow-700 bg-yellow-100 font-semibold",
+        };
+      case "fechado":
+        return {
+          text: "Fechado",
+          className: "text-red-700 bg-red-100 font-semibold",
+        };
+      default:
+        return {
+          text: status || "N/A",
+          className: "text-gray-500 bg-gray-100",
+        };
     }
   }
   const statusInfo = getStatusInfo(ticketInfo.status);
 
   function getPriorityInfo(priority) {
     switch (priority) {
-      case "low": return { text: "Baixa", className: "text-green-700 bg-green-100 font-semibold" };
-      case "medium": return { text: "Média", className: "text-yellow-700 bg-yellow-100 font-semibold" };
-      case "high": return { text: "Alta", className: "text-red-700 bg-red-100 font-bold" };
-      default: return { text: priority || "N/A", className: "text-gray-500 bg-gray-100" };
+      case "low":
+        return {
+          text: "Baixa",
+          className: "text-green-700 bg-green-100 font-semibold",
+        };
+      case "medium":
+        return {
+          text: "Média",
+          className: "text-yellow-700 bg-yellow-100 font-semibold",
+        };
+      case "high":
+        return { text: "Alta", className: "text-red-700 bg-red-100 font-bold" };
+      default:
+        return {
+          text: priority || "N/A",
+          className: "text-gray-500 bg-gray-100",
+        };
     }
   }
   const priorityInfo = getPriorityInfo(ticketInfo.priority);
+
+  const handleRemoveFile = (indexToRemove) => {
+    setFiles((prevFiles) =>
+      prevFiles.filter((_, index) => index !== indexToRemove)
+    );
+  };
 
   return (
     <div className="h-screen w-screen fixed top-0 left-0 bg-black/60 flex justify-end z-50">
@@ -153,14 +208,16 @@ function Comments({
               </div>
             </div>
             <div className="flex gap-2 text-sm">
-              <p className={`py-1 px-2 bg-[#5A2C40]/40 ${statusInfo.className} text-[#5A2C40] font-semibold rounded-full`}>
+              <p
+                className={`py-1 px-2 bg-[#5A2C40]/40 ${statusInfo.className} text-[#5A2C40] font-semibold rounded-full`}
+              >
                 {statusInfo.text}
               </p>
               <p className={`py-1 px-2 ${priorityInfo.className} rounded-full`}>
                 {priorityInfo.text}
               </p>
             </div>
-            <div className="text-sm grid grid-cols-[2fr_1fr] gap-4">
+            <div className="text-sm grid md:grid-cols-[2fr_1fr] gap-4">
               <div className="grid grid-cols-[auto_1fr] items-center text-[#8C847E] gap-1">
                 <Clock size={17} />
                 <p>Criado: {dataFormatada}</p>
@@ -209,21 +266,24 @@ function Comments({
               </div>
             </div>
             <div className="flex justify-around w-full">
-              {previewUrl && (
-                <>
-                  <img
-                    src={previewUrl}
-                    className="sm:h-30 sm:w-30 max-sm:h-25 max-sm:w-25 lg:h-40 lg:w-40 xl:w-50 xl:h-50 rounded-lg border-1 border-gray-300"
-                  />
-                  <img
-                    src={previewUrl}
-                    className="sm:h-30 sm:w-30 max-sm:h-25 max-sm:w-25 lg:h-40 lg:w-40 xl:w-50 xl:h-50 rounded-lg border-1 border-gray-300"
-                  />
-                  <img
-                    src={previewUrl}
-                    className="sm:h-30 sm:w-30 max-sm:h-25 lg:h-40 lg:w-40 xl:w-50 xl:h-50 max-sm:w-25 rounded-lg border-1 border-gray-300"
-                  />
-                </>
+              {files && (
+                <div className="mt-2 flex flex-col w-full gap-2">
+                  {files.map((file, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between font-semibold text-[#5A2C40] bg-[#F7F0E4] p-2 rounded"
+                    >
+                      <span className="text-xs truncate">{file.name}</span>
+                      <button
+                        type="button"
+                        className="text-red-400 hover:text-red-600 cursor-pointer"
+                        onClick={() => handleRemoveFile(index)}
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
           </form>
@@ -242,41 +302,11 @@ function Comments({
               const isCurrentUser = user.name === comment.author.name;
 
               return (
-                <li
+                <CommentItem
                   key={comment.id}
-                  className={`flex w-full ${
-                    isCurrentUser ? "justify-end" : "justify-start"
-                  }`}
-                >
-                  <div
-                    className="flex flex-col max-w-[80%] rounded-xl shadow-md p-3"
-                    style={{
-                      backgroundColor: isCurrentUser ? "#8B45711A" : "#fffdfa",
-                      border: "1px solid #dddddd",
-                    }}
-                  >
-                    <div
-                      className={`flex items-center gap-2 mb-1 text-sm text-gray-600 ${
-                        isCurrentUser ? "justify-end" : "justify-start"
-                      }`}
-                      style={{ color: "#5A2C40" }}
-                    >
-                      {!isCurrentUser && <User size={16} />}
-                      <span className="font-semibold">
-                        {comment.author.name}
-                      </span>
-                      <span className="text-xs">{finalDate}</span>
-                      {isCurrentUser && <User size={16} />}
-                    </div>
-
-                    <p
-                      className="text-lg break-words"
-                      style={{ color: "#5A2C40" }}
-                    >
-                      {comment.body}
-                    </p>
-                  </div>
-                </li>
+                  comment={comment}
+                  currentUser={user}
+                />
               );
             })}
           </ul>

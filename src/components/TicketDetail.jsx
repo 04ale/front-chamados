@@ -7,7 +7,8 @@ import { storage } from "../services/firebaseConfig";
 import { ref, listAll, getDownloadURL } from "firebase/storage";
 import Comments from "./Comments";
 import Update from "./Update";
-import PhotoDetail from "./PhotoDetail";
+import PhotoDetail from "../pages/PhotoDetail";
+import { Link } from "react-router-dom";
 
 function TicketDetail({
   closeDetails,
@@ -20,32 +21,27 @@ function TicketDetail({
   const [ticket, setTicket] = useState(null);
   const [imageUrls, setImageUrls] = useState([]);
   const [loading, setLoading] = useState(true);
-    const [imageUrl, setImageUrl] = useState([]);
+  const [imageUrl, setImageUrl] = useState([]);
 
-  const [isImageOpen, setIsImageOpen] = useState(false)
+  const [isImageOpen, setIsImageOpen] = useState(false);
   const listRef = ref(storage, `/tickets/${ticketInfo.id}`);
 
   useEffect(() => {
-    
-
     listAll(listRef)
       .then((res) => {
-        
-        const images = res.items.map((item)=> getDownloadURL(item))
+        const images = res.items.map((item) => getDownloadURL(item));
         Promise.all(images)
-        .then((urls) => {
-          setImageUrls(urls)
-          console.log("URLS", urls)
-        })
-        .catch((error)=> {
-          console.log("ERRO: ", error)
-        })
+          .then((urls) => {
+            setImageUrls(urls);
+          })
+          .catch((error) => {
+            console.error("ERRO: ", error);
+          });
       })
       .catch((error) => {
-        alert("Erro")
-        console.error("ERRO: ", error)
+        alert("Erro");
+        console.error("ERRO: ", error);
       });
-
   }, [ticketInfo.id]);
 
   const capitalizeFirstLetter = (string) => {
@@ -106,7 +102,6 @@ function TicketDetail({
           },
         });
         setTicket(response.data);
-        console.log(response.data);
       } catch (error) {
         console.error("ERRO: ", error);
       } finally {
@@ -122,20 +117,10 @@ function TicketDetail({
           Authorization: `Bearer ${user.token}`,
         },
       });
-      console.log(res);
     } catch (error) {
       alert("Erro ao adicionar imagem.");
       console.error("ERRO: ", error);
     }
-  }
-
-  function openImage(image){
-    setIsImageOpen(true)
-    setImageUrl(image)
-  }
-
-  function closeImage(){
-    setIsImageOpen(false)
   }
 
   function change(info) {
@@ -220,15 +205,19 @@ function TicketDetail({
           </div>
 
           <ul className="w-full flex sm:flex-row max-sm:flex-col gap-2 justify-around">
-            {imageUrls.map((image, index)=> (
-              <li key={index} onClick={(index)=> {
-                openImage(image)
-                console.log("TESTE: ", index)
-              }} className="flex flex-row justify-around w-full gap-2">
-                <img src={image} className="border border-gray-300 space-x-1 rounded-lg w-[280px] lg:h-[280px] md:h-[240px] sm:h-[200px] max-sm:h-[250px]"/>
+            {imageUrls.map((image, index) => (
+              <li
+                key={index}
+                className="flex flex-row justify-around w-full gap-2"
+              >
+                <Link to={`/photo?url=${encodeURIComponent(image)}`} target="_blank" rel="noopener noreferrer">
+                  <img
+                    src={image}
+                    className="border border-gray-300 space-x-1 rounded-lg w-[280px] lg:h-[280px] md:h-[240px] sm:h-[200px] max-sm:h-[250px]"
+                  />
+                </Link>
               </li>
             ))}
-              
           </ul>
         </div>
         {isAdmin ? (
@@ -265,7 +254,6 @@ function TicketDetail({
           </div>
         )}
       </div>
-      {isImageOpen && <PhotoDetail onClose={closeImage} image={imageUrl}/>}
     </div>
   );
 }

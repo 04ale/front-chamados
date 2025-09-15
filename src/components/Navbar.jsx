@@ -14,6 +14,8 @@ import { useAuth } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import NewTicket from "./NewTicket";
+import { auth } from "../services/firebaseConfig";
+import { signOut } from "firebase/auth";
 
 function Navbar() {
   const { logout, isAdmin, user, isLoggedIn } = useAuth();
@@ -39,16 +41,19 @@ function Navbar() {
     setIsModalOpen(false);
   };
 
-  const handleLogout = () => {
-    let res = confirm("Tem certeza que deseja deslogar?");
-
-    if (res) {
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      console.log("Usuário deslogado do Firebase.");
+      
       logout();
+    } catch (error) {
+      console.error("Erro ao fazer logout:", error);
     }
   };
   return (
     <nav className="flex flex-col">
-      <div className="p-3 md:hidden px-6 w-full fixed top-0 text-[#F7F0E4] border-b border-b-[#F7F0E4]/10 bg-[#5A2C40] shadow-md flex justify-between items-center z-40">
+      <div className="p-3 md:hidden px-6 w-full fixed top-0 text-[#F7F0E4] border-b border-b-[#F7F0E4]/10 bg-[#5A2C40] shadow-md flex justify-between items-center">
         <img src={logo1} className="w-auto h-8 max-sm:hidden" />
         <img src={logo2} className="h-8 sm:hidden" />
 

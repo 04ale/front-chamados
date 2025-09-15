@@ -4,26 +4,38 @@ import logo from "../../assets/img/logoVinho.png";
 import banner from "../../assets/img/banner.png";
 import { useAuth } from "../../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
+import { auth } from "../../services/firebaseConfig";
+import { signInWithEmailAndPassword } from "firebase/auth";
 import api from "../../services/api";
 
 function SignIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { login, isAdmin } = useAuth();
+  const { login } = useAuth();
   const nav = useNavigate();
 
   const handleSignIn = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
+  try {
+    const res = await api.post("/auth/login", { email, password });
+    login(res.data); 
+
     try {
-      const response = await api.post("/auth/login", { email, password });
-
-      login(response.data);
-
+      await signInWithEmailAndPassword(auth, email, password);
+      
       nav("/");
-    } catch (err) {
-      alert("Erro de login:", err);
+
+    } catch (error) {
+      console.error("Erro Firebase:", error);
+      alert("Erro ao se conectar");
+      nav("/"); 
     }
-  };
+
+  } catch (apiError) {
+    console.error("Erro de login na API:", apiError);
+    alert("Email ou senha inválidos.");
+  }
+};
 
   return (
     <div className="max-lg:w-[320px] w-full flex flex-row items-center justify-center">
