@@ -1,13 +1,11 @@
 /* eslint-disable no-unused-vars */
 import { useState, useEffect } from "react";
-import api from "../services/api";
-import { useAuth } from "../hooks/useAuth";
+import api from "../../services/api";
+import { useAuth } from "../../hooks/useAuth";
 import { User, X } from "lucide-react";
-import { storage } from "../services/firebaseConfig";
+import { storage } from "../../services/firebaseConfig";
 import { ref, listAll, getDownloadURL } from "firebase/storage";
-import Comments from "./Comments";
-import Update from "./Update";
-import PhotoDetail from "../pages/PhotoDetail";
+
 import { Link } from "react-router-dom";
 
 function TicketDetail({

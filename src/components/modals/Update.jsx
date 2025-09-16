@@ -1,7 +1,7 @@
 import { Undo2, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useAuth } from "../hooks/useAuth";
-import api from "../services/api";
+import { useAuth } from "../../hooks/useAuth";
+import api from "../../services/api";
 
 function Update({ closeEdit, ticketInfo, handleBack }) {
   const [title, setTitle] = useState("");

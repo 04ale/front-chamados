@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import api from "../services/api";
-import { useAuth } from "../hooks/useAuth";
+import api from "../../services/api";
+import { useAuth } from "../../hooks/useAuth";
 import { Search, Trash, User } from "lucide-react";
 import CountTickets from "./CountTickets";
 

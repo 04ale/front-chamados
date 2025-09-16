@@ -1,10 +1,10 @@
 import { X } from "lucide-react";
 import React, { useEffect, useState } from "react";
-import api from "../services/api";
-import { useAuth } from "../hooks/useAuth";
+import api from "../../services/api";
+import { useAuth } from "../../hooks/useAuth";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { v4 } from "uuid";
-import { storage } from "../services/firebaseConfig";
+import { storage } from "../../services/firebaseConfig";
 
 function NewTicket({ onClose }) {
   const [title, setTitle] = useState("");

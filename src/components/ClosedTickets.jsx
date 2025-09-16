@@ -9,9 +9,9 @@ import {
   User,
   Search,
 } from "lucide-react";
-import TicketDetail from "./TicketDetail";
-import Comments from "./Comments";
-import Update from "./Update";
+import TicketDetail from "./modals/TicketDetail";
+import Comments from "./modals/Comments";
+import Update from "./modals/Update";
 
 import SearchBar from "./SearchBar";
 import { useNavigate } from "react-router-dom";

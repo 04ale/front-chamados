@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { ref, listAll, getDownloadURL } from "firebase/storage";
-import { storage } from "../services/firebaseConfig";
+import { storage } from "../../services/firebaseConfig";
 import { User } from "lucide-react";
 import { Link } from "react-router-dom";
 

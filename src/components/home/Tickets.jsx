@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import api from "../services/api";
-import { useAuth } from "../hooks/useAuth";
+import api from "../../services/api";
+import { useAuth } from "../../hooks/useAuth";
 import {
   ChevronLeft,
   ChevronRight,
@@ -9,15 +9,16 @@ import {
   User,
   Search,
 } from "lucide-react";
-import TicketDetail from "./TicketDetail";
-import Comments from "./Comments";
-import Update from "./Update";
-import SearchBar from "./SearchBar";
-import { useNavigate } from "react-router-dom";
-import Filters from "./Filters";
+import TicketDetail from "../modals/TicketDetail";
+import Comments from "../modals/Comments";
+import Update from "../modals/Update";
+import SearchBar from "../SearchBar";
+import Filters from "../Filters";
+import Header from "./Header";
+import Chevrons from "../Chevrons";
 
 function Tickets() {
-  const { user, isAdmin } = useAuth();
+  const { user } = useAuth();
   const [currentPage, setCurrentPage] = useState(1);
   const [allTicketsFromApi, setAllTicketsFromApi] = useState([]);
   const [displayedTickets, setDisplayedTickets] = useState([]);
@@ -32,7 +33,6 @@ function Tickets() {
   const [priority, setPriority] = useState("");
   const [inputValue, setInputValue] = useState("");
 
-  const nav = useNavigate();
   const screenRef = useRef();
 
   function getPriorityInfo(priority) {
@@ -121,9 +121,9 @@ function Tickets() {
   }, [user?.token, currentPage, status, priority, selectedId]);
 
   useEffect(() => {
-    const lowerCaseInputValue = inputValue.toLowerCase(); 
+    const lowerCaseInputValue = inputValue.toLowerCase();
     if (inputValue) {
-      const filtered = allTicketsFromApi.filter(ticket => 
+      const filtered = allTicketsFromApi.filter((ticket) =>
         ticket.title.toLowerCase().includes(lowerCaseInputValue)
       );
       setDisplayedTickets(filtered);
@@ -155,24 +155,10 @@ function Tickets() {
       <div className="w-full h-full flex flex-col gap-4 ">
         <div>
           <div className=" w-full md:px-10 max-md:px-7 pr-5 md:pt-10 max-md:pt-7">
-            <div className="grid grid-cols-[1fr_auto]">
-              <div className=" text-[#5A2C40]" ref={screenRef}>
-                <h1 className="text-4xl font-bold ">Tickets</h1>
-                <p className="text-2xl font-semibold">
-                  {capitalizeFirstLetter(user?.name)}
-                </p>
-              </div>
-              <div>
-                {isAdmin && (
-                  <button
-                    className="p-3 border border-[#5A2C40]/20 bg-[#FFFBF5] font-semibold text-[#5A2C40] rounded-lg cursor-pointer"
-                    onClick={() => nav("/closed")}
-                  >
-                    Ver tickets fechados
-                  </button>
-                )}
-              </div>
-            </div>
+            <Header
+              capitalizeFirstLetter={capitalizeFirstLetter}
+              screenRef={screenRef}
+            />
             <div className="flex gap-4 w-full py-6">
               <div className="grid 2xl:grid-cols-[1fr_1fr] max-2xl:gap-2 2xl:gap-10 w-full">
                 <SearchBar
@@ -259,41 +245,11 @@ function Tickets() {
             )}
           </div>
         </div>
-
-        <div className="justify-between items-center flex flex-row px-8 gap-4 mt-2">
-          {currentPage !== 1 && (
-            <div className="flex gap-4">
-              <ChevronsLeft
-                size={50}
-                onClick={() => setCurrentPage(1)}
-                className=" bg-[#8B4571]/30 hover:bg-[#8B4571]/40 hover:text-[#5a1c37] duration-200 transition-all text-[#5A2C40] rounded-lg cursor-pointer"
-              />
-              <ChevronLeft
-                size={50}
-                onClick={() => setCurrentPage(currentPage - 1)}
-                className=" bg-[#8B4571]/30 hover:bg-[#8B4571]/40 hover:text-[#5a1c37] duration-200 transition-all text-[#5A2C40] rounded-lg cursor-pointer"
-              />
-            </div>
-          )}
-
-          {pagination.total > currentPage * 30 && (
-            <div className="w-full flex justify-between">
-              <p></p>
-              <div className="flex gap-4">
-                <ChevronRight
-                  size={50}
-                  onClick={() => setCurrentPage(currentPage + 1)}
-                  className=" bg-[#8B4571]/30 hover:bg-[#8B4571]/40 hover:text-[#5a1c37] text-[#5A2C40] duration-200 transition-all rounded-lg cursor-pointer"
-                />
-                <ChevronsRight
-                  size={50}
-                  className=" bg-[#8B4571]/30 hover:bg-[#8B4571]/40 hover:text-[#5a1c37] text-[#5A2C40] duration-200 transition-all rounded-lg cursor-pointer"
-                  onClick={() => setCurrentPage(pagination.lastPage)}
-                />
-              </div>
-            </div>
-          )}
-        </div>
+        <Chevrons
+          pagination={pagination}
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+        />
       </div>
       {isDetailsOpen && (
         <TicketDetail
@@ -302,7 +258,6 @@ function Tickets() {
           openEdit={openEdit}
           ticketInfo={ticket}
           onTicketDeleted={handleTicketDeleted}
-          
         />
       )}
       {isCommentsOpen && (

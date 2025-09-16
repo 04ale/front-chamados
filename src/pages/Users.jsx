@@ -1,4 +1,4 @@
-import ListUsers from "../components/ListUsers";
+import ListUsers from "../components/users/ListUsers"
 import Navbar from "../components/Navbar";
 
 function Users() {

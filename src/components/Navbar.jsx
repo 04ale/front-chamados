@@ -13,7 +13,7 @@ import logo2 from "../assets/img/logoBranca1.png";
 import { useAuth } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import NewTicket from "./NewTicket";
+import NewTicket from "./modals/NewTicket";
 import { auth } from "../services/firebaseConfig";
 import { signOut } from "firebase/auth";
 

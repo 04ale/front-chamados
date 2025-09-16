@@ -1,5 +1,5 @@
 import Navbar from "../components/Navbar";
-import Tickets from "../components/Tickets";
+import Tickets from "../components/home/Tickets";
 import { useState } from "react";
 
 function Home() {

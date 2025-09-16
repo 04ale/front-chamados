@@ -9,11 +9,11 @@ import {
   X,
 } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
-import api from "../services/api";
-import { useAuth } from "../hooks/useAuth";
+import api from "../../services/api";
+import { useAuth } from "../../hooks/useAuth";
 import CommentItem from "./CommentItem";
 
-import { storage } from "../services/firebaseConfig";
+import { storage } from "../../services/firebaseConfig";
 import { uploadBytes, ref } from "firebase/storage";
 
 function Comments({
@@ -21,10 +21,8 @@ function Comments({
   ticketId,
   handleBack,
   ticketInfo,
-  capitalizeFirstLetter,
 }) {
   const [comments, setComments] = useState([]);
-  const [openComments, setOpenComments] = useState(false);
   const [body, setBody] = useState("");
   const [files, setFiles] = useState([]);
   const formRef = useRef(null);
@@ -117,12 +115,6 @@ function Comments({
     minute: "2-digit",
   };
   const dataFormatada = new Intl.DateTimeFormat("pt-BR", opcoes).format(data);
-
-  useEffect(() => {
-    if (openComments && formRef.current) {
-      formRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
-  }, [openComments]);
 
   const handleImageChange = (e) => {
     if (e.target.files) {
@@ -294,26 +286,13 @@ function Comments({
           </form>
 
           <ul className="flex flex-col gap-4 p-4 max-h-[600px] w-full overflow-y-auto">
-            {comments.map((comment) => {
-              const date = new Date(comment.created_at);
-              const finalDate = new Intl.DateTimeFormat("pt-BR", {
-                day: "2-digit",
-                month: "2-digit",
-                year: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-              }).format(date);
-
-              const isCurrentUser = user.name === comment.author.name;
-
-              return (
-                <CommentItem
-                  key={comment.id}
-                  comment={comment}
-                  currentUser={user}
-                />
-              );
-            })}
+            {comments.map((comment) => (
+              <CommentItem
+                key={comment.id}
+                comment={comment}
+                currentUser={user}
+              />
+            ))}
           </ul>
         </div>
       </div>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import api from "../services/api";
-import { useAuth } from "../hooks/useAuth";
+import api from "../../services/api";
+import { useAuth } from "../../hooks/useAuth";
 
 function CountTickets({ userInfo }) {
   const [count, setCount] = useState([]);
