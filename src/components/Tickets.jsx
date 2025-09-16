@@ -102,13 +102,13 @@ function Tickets() {
         selectedId: selectedId || undefined,
       };
 
-      const response = await api.get(`/tickets/filtered`, {
+      const res = await api.get(`/tickets/filtered`, {
         headers: { Authorization: `Bearer ${user.token}` },
         params: params,
       });
 
-      setAllTicketsFromApi(response.data.tickets || []);
-      setPagination(response.data.pagination || {});
+      setAllTicketsFromApi(res.data.tickets || []);
+      setPagination(res.data.pagination || {});
     } catch (error) {
       console.error("ERRO ao buscar tickets:", error);
     } finally {
@@ -124,9 +124,7 @@ function Tickets() {
     const lowerCaseInputValue = inputValue.toLowerCase(); 
     if (inputValue) {
       const filtered = allTicketsFromApi.filter(ticket => 
-        ticket.title.toLowerCase().includes(lowerCaseInputValue) ||
-        (ticket.creator && ticket.creator.name.toLowerCase().includes(lowerCaseInputValue)) ||
-        (ticket.creator && ticket.creator.email.toLowerCase().includes(lowerCaseInputValue))
+        ticket.title.toLowerCase().includes(lowerCaseInputValue)
       );
       setDisplayedTickets(filtered);
     } else {
@@ -194,7 +192,7 @@ function Tickets() {
               </div>
             </div>
           </div>
-          <div className="border-b border-[#8C847E]">
+          <div className="border-[#8C847E]">
             <div className="grid lg:grid-cols-[2fr_3fr_3fr_1fr_1fr_auto] max-lg:grid-cols-[2fr_3fr_1fr_auto] max-sm:grid-cols-[2fr_3fr_auto] gap-4 items-center font-bold bg-[#FFFBF5] py-2 px-3 text-[#8C847E]">
               <p>Nome</p>
               <p className="max-lg:hidden">E-mail</p>

@@ -16,7 +16,7 @@ export const AuthProvider = ({ children }) => {
         const authData = JSON.parse(storedData);
         
         if (authData.expiration && authData.expiration < Date.now()) {
-          console.log("Token expirado, limpando sessão.");
+          console.log("Token expirado.");
           localStorage.removeItem("authData");
           setUser(null);
         } else {

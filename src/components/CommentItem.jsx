@@ -74,7 +74,6 @@ function CommentItem({ comment, currentUser }) {
               <img
                 
                 src={image}
-                alt={`Anexo ${index + 1} do comentário`}
                 className="w-20 h-20 object-cover rounded-md border"
               />
             </Link>

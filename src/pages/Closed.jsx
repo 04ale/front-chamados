@@ -5,9 +5,8 @@ function Closed() {
   return (
     <div>
       <Navbar />
-      <div className="md:ml-[119px] xl:ml-[336px] max-md:pt-[40px] mb-14">
+      <div className="md:ml-[119px] xl:ml-[336px] max-md:py-[40px] md:pb-[40px]">
         <ClosedTickets />
-        
       </div>
     </div>
   );

@@ -55,7 +55,7 @@ function Comments({
     try {
       const res = await api.post(
         `/tickets/${ticketId}/comments`,
-        { body }, 
+        { body },
         {
           headers: {
             Authorization: `Bearer ${user.token}`,
@@ -67,22 +67,21 @@ function Comments({
       if (files.length > 0) {
         try {
           const uploadPromises = files.map((file) => {
-          const fileRef = ref(
-            storage,
-            `/tickets/comments/${newCommentId}/${file.name}`
-          );
-          return uploadBytes(fileRef, file);
-        });
-        await Promise.all(uploadPromises);
+            const fileRef = ref(
+              storage,
+              `/tickets/comments/${newCommentId}/${file.name}`
+            );
+            return uploadBytes(fileRef, file);
+          });
+          await Promise.all(uploadPromises);
         } catch (error) {
-          console.error("ERRO UPLOAD: ", error)
+          console.error("ERRO UPLOAD: ", error);
         }
-        
       }
 
       alert("Comentário adicionado com sucesso!");
       setBody("");
-      setFiles([]); 
+      setFiles([]);
       getComments();
     } catch (error) {
       console.error("Erro ao criar comentário:", error);
@@ -194,7 +193,13 @@ function Comments({
 
   return (
     <div className="h-screen w-screen fixed top-0 left-0 bg-black/60 flex justify-end z-50">
-      <div className="h-screen overflow-auto w-[800px] text-[#5A2C40] max-md:py-17 bg-[#FFFBF5] p-6">
+      <button
+        onClick={handleBack}
+        className="max-lg:hidden absolute cursor-pointer left-4 top-4 font-semibold py-3 px-5 border text-[#5A2C40] border-[#5A2C40]/50 rounded-lg bordx bg-[#FFFBF5] duration-300 transition-all hover:bg-[#fff7ea] z-50"
+      >
+        Voltar
+      </button>
+      <div className="h-screen overflow-auto w-[800px] text-[#5A2C40] bg-[#FFFBF5] p-6">
         <div className="flex flex-col items-center gap-4">
           <div className="flex flex-col gap-5 center w-full">
             <div className="flex flex-col items-center w-full gap-2">

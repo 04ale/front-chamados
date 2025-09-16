@@ -4,13 +4,13 @@ function SearchBar({ inputValue, setInputValue }) {
   
   return (
     
-      <div className="w-full flex flex-col gap-2 z-10">
-        <p className="text-xl font-semibold text-[#5A2C40]">Procurar ticket</p>
-        <div className="relative flex items-center w-full">
+      <div className="w-full h-full flex flex-col gap-2 z-10">
+        <p className="text-xl text-start font-semibold text-[#5A2C40]">Procurar ticket</p>
+        <div className="relative flex items-center h-full w-full">
           <div className="absolute left-3">
             <Search className="h-5 w-5 text-gray-400" />
           </div>
-          <div className="grid grid-cols-[1fr_auto] w-full gap-2">
+          <div className="flex items-center w-full gap-2">
             <input
               type="text"
               placeholder="Pesquisar por título"

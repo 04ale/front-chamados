@@ -150,10 +150,7 @@ function ClosedTickets() {
       <div className="w-full h-full flex flex-col gap-4 ">
         <div>
           <div className="grid grid-cols-[1fr_auto] md:pl-10 max-md:pl-7 md:pt-10 pr-5 max-md:pt-7">
-            <div
-              className=" text-[#5A2C40]"
-              ref={screenRef}
-            >
+            <div className=" text-[#5A2C40]" ref={screenRef}>
               <h1 className="text-4xl font-bold ">Tickets</h1>
               <p className="text-2xl font-semibold">
                 {capitalizeFirstLetter(user?.name)}
@@ -161,7 +158,7 @@ function ClosedTickets() {
             </div>
             <div>
               <button
-                className="p-3 bg-white rounded-lg cursor-pointer"
+                className="p-3 border border-[#5A2C40]/20 bg-[#FFFBF5] font-semibold text-[#5A2C40] rounded-lg cursor-pointer"
                 onClick={() => nav("/")}
               >
                 Ver tickets abertos

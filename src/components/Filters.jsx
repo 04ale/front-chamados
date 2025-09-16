@@ -47,49 +47,61 @@ function Filters({
         <p className="text-center text-xl font-semibold text-[#5A2C40]">
           Filtros
         </p>
-        <form className="flex flex-col w-full font-semibold" onSubmit={handleSubmit}>
+        <form
+          className="flex flex-col w-full font-semibold"
+          onSubmit={handleSubmit}
+        >
           <div className="flex w-full lg:flex-row max-lg:flex-col gap-3">
             {isAdmin && (
-              <select
-                name=""
-                id=""
-                className="border border-[#5A2C40]/20 bg-[#FFFBF5] text-[#5A2C40] lg:w-1/2 rounded-lg p-2"
-                value={selectedId}
-                onChange={(e) => setSelectedId(e.target.value)}
-              >
-                <option value="">Todos</option>
-                {users.map((user) => (
-                  <option key={user.id} value={user.id}>
-                    {user.name}
-                  </option>
-                ))}
-              </select>
+              <div className="max-lg:w-full lg:w-1/2 flex flex-col gap-1">
+                <p className="text-[#8C847E] text-sm">Nome: </p>
+                <select
+                  name=""
+                  id=""
+                  className="border border-[#5A2C40]/20 bg-[#FFFBF5] text-[#5A2C40] w-full rounded-lg p-2"
+                  value={selectedId}
+                  onChange={(e) => setSelectedId(e.target.value)}
+                >
+                  <option value="">Todos</option>
+                  {users.map((user) => (
+                    <option key={user.id} value={user.id}>
+                      {user.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
             )}
-            <div className="flex flex-row w-full gap-2 lg:w-1/2">
-              <select
-                name=""
-                id=""
-                className="border border-[#5A2C40]/20 bg-[#FFFBF5] w-1/2 text-[#5A2C40] rounded-lg p-2"
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
-              >
-                <option value="">Todos</option>
-                <option value="aberto">Aberto</option>
-                <option value="em_andamento">Em andamento</option>
-                <option value="fechado">Fechado</option>
-              </select>
-              <select
-                name=""
-                id=""
-                className="border border-[#5A2C40]/20 bg-[#FFFBF5] w-1/2 text-[#5A2C40] rounded-lg p-2"
-                value={priority}
-                onChange={(e) => setPriority(e.target.value)}
-              >
-                <option value="">Todos</option>
-                <option value="low">Baixa</option>
-                <option value="medium">Média</option>
-                <option value="high">Alta</option>
-              </select>
+            <div className={`flex flex-row w-full gap-2 lg:w-1/2 ${!isAdmin && "lg:w-full"}`}>
+              <div className="w-1/2">
+                <p className="text-[#8C847E] text-sm">Status: </p>
+                <select
+                  name=""
+                  id=""
+                  className="border border-[#5A2C40]/20 bg-[#FFFBF5] w-full text-[#5A2C40] rounded-lg p-2"
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value)}
+                >
+                  <option value="">Todos</option>
+                  <option value="aberto">Aberto</option>
+                  <option value="em_andamento">Em andamento</option>
+                  <option value="fechado">Fechado</option>
+                </select>
+              </div>
+              <div className="w-1/2">
+                <p className="text-[#8C847E] text-sm">Prioridade: </p>
+                <select
+                  name=""
+                  id=""
+                  className="border border-[#5A2C40]/20 bg-[#FFFBF5] w-full text-[#5A2C40] rounded-lg p-2"
+                  value={priority}
+                  onChange={(e) => setPriority(e.target.value)}
+                >
+                  <option value="">Todos</option>
+                  <option value="low">Baixa</option>
+                  <option value="medium">Média</option>
+                  <option value="high">Alta</option>
+                </select>
+              </div>
             </div>
           </div>
           <button
