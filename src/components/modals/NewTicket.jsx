@@ -26,17 +26,6 @@ function NewTicket({ onClose }) {
           return await getDownloadURL(imageRef);
         })
       );
-
-      console.log(filesUrls)
-
-      console.log({
-
-        title,
-        description,
-        files: filesUrls,
-        priority,
-        status,
-      });
       await api.post(
         "/tickets",
         {
@@ -98,11 +87,7 @@ function NewTicket({ onClose }) {
   useEffect(() => {
     console.log("Estado FILES atualizado:", files);
   }, [files]);
-
-  useEffect(() => {
-    console.log(priority);
-  }, [priority]);
-
+  
   return (
     <div className="h-screen w-screen fixed bg-black/60 flex justify-center items-center z-50">
       <X
@@ -139,10 +124,9 @@ function NewTicket({ onClose }) {
             <label className="text-sm font-medium  "> Prioridade</label>
             <select
               value={priority}
-              onChange={(e) => {
-                setPriority(e.target.value);
-                console.log(priority);
-              }}
+              onChange={(e) => 
+                setPriority(e.target.value)
+              }
               className="w-full rounded-md p-2 bg-[#5A2C40] text-white focus:outline-none text-sm"
             >
               <option value="low" className="rounded-lg">
@@ -186,7 +170,7 @@ function NewTicket({ onClose }) {
                     key={index}
                     className="flex items-center justify-between bg-[#5A2C40] p-2 rounded"
                   >
-                    <span className="text-xs truncate">{file.name}</span>
+                    <span className="text-xs break-words">{file.name}</span>
                     <button
                       type="button"
                       className="text-red-400 hover:text-red-600 cursor-pointer"

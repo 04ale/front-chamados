@@ -1,3 +1,4 @@
+import { ChevronLeft, ChevronRight, ChevronsRight, ChevronsLeft } from 'lucide-react'
 import React from 'react'
 
 function Chevrons({currentPage, setCurrentPage, pagination}) {

@@ -16,7 +16,7 @@ function App() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        console.log("Sessão Firebase ativa");
+        console.log("Sessão Firebase ativa com o usuário:", user.email);
       } else {
         console.log("Sessão Firebase inativa.");
       }

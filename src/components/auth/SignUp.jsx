@@ -4,28 +4,38 @@ import logo from "../../assets/img/logoVinho.png";
 import banner from "../../assets/img/banner.png";
 import api from "../../services/api";
 import { useAuth } from "../../hooks/useAuth";
+import { auth } from "../../services/firebaseConfig";
+import { createUserWithEmailAndPassword } from "firebase/auth";
 
 function SignUp() {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
-  const {user} = useAuth()
+  const { user } = useAuth();
 
   const handleSignUp = async (e) => {
     try {
       e.preventDefault();
-      const response = await api.post("/auth/register", { name, email, role: "user" },  {headers:{
-              Authorization: `Bearer ${user.token}`,}
-            },);
-      console.log("Senha do "+ response.data.user.name + ": " + response.data.senha)
-      alert("Usuário cadastrado com sucesso!\n"+ "Senha: " + response.data.senha)
-      setEmail('')
-      setName('')
-
+      const res = await api.post(
+        "/auth/register",
+        { name, email, role: "user" },
+        {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+        }
+      );
+      await createUserWithEmailAndPassword(auth, email, res.data.senha);
+      console.log(
+        "Senha do " + res.data.user.name + ": " + res.data.senha
+      );
+      alert(
+        "Usuário cadastrado com sucesso!\n" + "Senha: " + res.data.senha
+      );
+      setEmail("");
+      setName("");
     } catch (error) {
-      alert("Erro", error)
+      alert("Erro", error);
     }
-    
-
   };
 
   return (
@@ -53,7 +63,6 @@ function SignUp() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
-              
             </div>
             <button
               type="submit"
