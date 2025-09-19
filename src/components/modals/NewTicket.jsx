@@ -5,12 +5,14 @@ import { useAuth } from "../../hooks/useAuth";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { v4 } from "uuid";
 import { storage } from "../../services/firebaseConfig";
+import { toast } from "sonner";
 
 function NewTicket({ onClose }) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState("low");
   const [files, setFiles] = useState([]);
+  const [fileType, setFileType] = useState("");
 
   const { user } = useAuth();
   const status = "aberto";
@@ -18,7 +20,7 @@ function NewTicket({ onClose }) {
   async function createTicket(e) {
     e.preventDefault();
     try {
-      const id = v4()
+      const id = v4();
       const filesUrls = await Promise.all(
         files.map(async (file) => {
           const imageRef = ref(storage, `tickets/${id}/${file.name}`);
@@ -42,11 +44,11 @@ function NewTicket({ onClose }) {
           },
         }
       );
-      alert("Ticket criado com sucesso!");
-      onClose()
-      window.location.reload()
+      toast.success("Ticket criado com sucesso!");
+      onClose();
+      window.location.reload();
     } catch (error) {
-      alert("Erro ao criar o ticket, tente novamente");
+      toast.error("Erro ao criar o ticket, tente novamente");
       console.log("ERRO: ", error);
     }
   }
@@ -54,9 +56,14 @@ function NewTicket({ onClose }) {
   const handleDrop = (e) => {
     e.preventDefault();
     if (e.dataTransfer.files) {
+      setFileType(e.dataTransfer.files[0].type);
+      if (fileType !== "image/png" && fileType !== "image/jpeg") {
+        toast.warning("Apenas arquivos PNG ou JPEG são permitidos.");
+        return;
+      }
       const newFiles = Array.from(e.dataTransfer.files);
       if (files.length + newFiles.length > 3) {
-        alert("Você pode anexar no máximo 3 arquivos.");
+        toast.warning("Você pode anexar no máximo 3 arquivos.");
         return;
       }
       setFiles((prevFiles) => [...prevFiles, ...newFiles]);
@@ -65,15 +72,13 @@ function NewTicket({ onClose }) {
 
   const handleDragOver = (e) => {
     e.preventDefault();
-    console.log('handleDragOver')
-    
   };
 
   const handleFileChange = (e) => {
     if (e.target.files) {
       const newFiles = Array.from(e.target.files);
       if (files.length + newFiles.length > 3) {
-        alert("Você pode anexar no máximo 3 arquivos.");
+        toast.warning("Você pode anexar no máximo 3 arquivos.");
         return;
       }
       setFiles((prevFiles) => [...prevFiles, ...newFiles]);
@@ -81,13 +86,11 @@ function NewTicket({ onClose }) {
   };
 
   const handleRemoveFile = (indexToRemove) => {
-    setFiles((prevFiles) => prevFiles.filter((_, index) => index !== indexToRemove));
+    setFiles((prevFiles) =>
+      prevFiles.filter((_, index) => index !== indexToRemove)
+    );
   };
 
-  useEffect(() => {
-    console.log("Estado FILES atualizado:", files);
-  }, [files]);
-  
   return (
     <div className="h-screen w-screen fixed bg-black/60 flex justify-center items-center z-50">
       <X
@@ -124,9 +127,7 @@ function NewTicket({ onClose }) {
             <label className="text-sm font-medium  "> Prioridade</label>
             <select
               value={priority}
-              onChange={(e) => 
-                setPriority(e.target.value)
-              }
+              onChange={(e) => setPriority(e.target.value)}
               className="w-full rounded-md p-2 bg-[#5A2C40] text-white focus:outline-none text-sm"
             >
               <option value="low" className="rounded-lg">
@@ -155,7 +156,13 @@ function NewTicket({ onClose }) {
                 </h4>
                 <div className="flex items-center justify-center">
                   <label>
-                    <input type="file" hidden onChange={handleFileChange} />
+                    <input
+                      type="file"
+                      hidden
+                      onChange={handleFileChange}
+                      accept="image/png, image/jpeg"
+                      name="image"
+                    />
                     <div className="flex w-28 h-9 px-2 flex-col bg-[#3d1f2c] rounded-full shadow text-white text-xs font-semibold items-center justify-center cursor-pointer focus:outline-none">
                       Escolher arquivo
                     </div>
@@ -174,7 +181,7 @@ function NewTicket({ onClose }) {
                     <button
                       type="button"
                       className="text-red-400 hover:text-red-600 cursor-pointer"
-                      onClick={()=>handleRemoveFile(index)}
+                      onClick={() => handleRemoveFile(index)}
                     >
                       <X size={16} />
                     </button>

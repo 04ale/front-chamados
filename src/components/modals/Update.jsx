@@ -2,6 +2,7 @@ import { Undo2, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import api from "../../services/api";
+import { toast } from "sonner";
 
 function Update({ closeEdit, ticketInfo, handleBack }) {
   const [title, setTitle] = useState("");
@@ -51,8 +52,9 @@ function Update({ closeEdit, ticketInfo, handleBack }) {
         }
       );
       window.location.reload()      
-      alert("Ticket atualizado com sucesso!");
+      toast.success("Ticket atualizado com sucesso!");
     } catch (error) {
+      toast.error("Erro ao atualizar o ticket, tente novamente");
       console.log("ERRO AO ATUALIZAR: ", error);
     }
   }

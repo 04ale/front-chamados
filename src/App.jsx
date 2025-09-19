@@ -5,7 +5,6 @@ import Register from "./pages/Register";
 import Login from "./pages/Login";
 import { useAuth } from "./hooks/useAuth";
 import Users from "./pages/Users";
-import Closed from "./pages/Closed";
 import PhotoDetail from "./pages/PhotoDetail";
 import { useEffect } from "react";
 import { onAuthStateChanged } from "firebase/auth";
@@ -30,9 +29,7 @@ function App() {
       <Route path="/login" element={isLoggedIn ? <Navigate to='/'/> : <Login /> } />
       <Route path="/register" element={isAdmin ? <Register />  : <Navigate to='/'/> } />
       <Route path="/" element={!isLoggedIn ? <Navigate to='/login'/> : <Home /> } />
-      <Route path="/closed" element={!isAdmin ? <Navigate to='/login'/> : <Closed /> } />
       <Route path="/users" element={isAdmin ? <Users />  : <Navigate to='/'/> } />
-      {/**<Route path="/photo" element={!isLoggedIn ? <Navigate to='/login'/> : <PhotoDetail /> } />*/}
       <Route path="/photo" element={<PhotoDetail />}/>
 
     </Routes>

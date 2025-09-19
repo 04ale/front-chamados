@@ -6,6 +6,7 @@ import api from "../../services/api";
 import { useAuth } from "../../hooks/useAuth";
 import { auth } from "../../services/firebaseConfig";
 import { createUserWithEmailAndPassword } from "firebase/auth";
+import { toast } from "sonner";
 
 function SignUp() {
   const [email, setEmail] = useState("");
@@ -28,13 +29,13 @@ function SignUp() {
       console.log(
         "Senha do " + res.data.user.name + ": " + res.data.senha
       );
-      alert(
+      toast.success(
         "Usuário cadastrado com sucesso!\n" + "Senha: " + res.data.senha
       );
       setEmail("");
       setName("");
     } catch (error) {
-      alert("Erro", error);
+      toast.error("Erro", error);
     }
   };
 

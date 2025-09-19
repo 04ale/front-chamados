@@ -1,43 +1,66 @@
-import { ChevronLeft, ChevronRight, ChevronsRight, ChevronsLeft } from 'lucide-react'
-import React from 'react'
+import {
+  ChevronLeft,
+  ChevronRight,
+  ChevronsRight,
+  ChevronsLeft,
+} from "lucide-react";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+  PaginationFirst,
+  PaginationLast,
+} from "@/components/ui/pagination";
 
-function Chevrons({currentPage, setCurrentPage, pagination}) {
+function Chevrons({ currentPage, setCurrentPage, pagination }) {
+  const page = 12 + 1;
   return (
-     <div className="justify-between items-center flex flex-row px-8 gap-4 mt-2">
+    <div className={`justify-between items-center flex flex-row px-8 gap-4 mt-2 ${pagination.total <= page && 'hidden'}`}>
+      <Pagination>
+        <PaginationContent>
           {currentPage !== 1 && (
-            <div className="flex gap-4">
-              <ChevronsLeft
-                size={50}
-                onClick={() => setCurrentPage(1)}
-                className=" bg-[#8B4571]/30 hover:bg-[#8B4571]/40 hover:text-[#5a1c37] duration-200 transition-all text-[#5A2C40] rounded-lg cursor-pointer"
-              />
-              <ChevronLeft
-                size={50}
-                onClick={() => setCurrentPage(currentPage - 1)}
-                className=" bg-[#8B4571]/30 hover:bg-[#8B4571]/40 hover:text-[#5a1c37] duration-200 transition-all text-[#5A2C40] rounded-lg cursor-pointer"
-              />
-            </div>
-          )}
-
-          {pagination.total > currentPage * 30 && (
-            <div className="w-full flex justify-between">
-              <p></p>
-              <div className="flex gap-4">
-                <ChevronRight
-                  size={50}
-                  onClick={() => setCurrentPage(currentPage + 1)}
-                  className=" bg-[#8B4571]/30 hover:bg-[#8B4571]/40 hover:text-[#5a1c37] text-[#5A2C40] duration-200 transition-all rounded-lg cursor-pointer"
+            <>
+              <PaginationItem>
+                <PaginationFirst
+                  setCurrentPage={setCurrentPage}
+                  currentPage={currentPage}
                 />
-                <ChevronsRight
-                  size={50}
-                  className=" bg-[#8B4571]/30 hover:bg-[#8B4571]/40 hover:text-[#5a1c37] text-[#5A2C40] duration-200 transition-all rounded-lg cursor-pointer"
-                  onClick={() => setCurrentPage(pagination.lastPage)}
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationPrevious
+                  setCurrentPage={setCurrentPage}
+                  currentPage={currentPage}
                 />
-              </div>
-            </div>
+              </PaginationItem>
+            </>
           )}
-        </div>
-  )
+          <PaginationItem>
+            <PaginationLink>{currentPage}</PaginationLink>
+          </PaginationItem>
+          {pagination.total > currentPage * page && (
+            <>
+              <PaginationItem>
+                <PaginationNext
+                  setCurrentPage={setCurrentPage}
+                  currentPage={currentPage}
+                />
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationLast
+                  setCurrentPage={setCurrentPage}
+                  pagination={pagination}
+                />
+              </PaginationItem>
+            </>
+          )}
+        </PaginationContent>
+      </Pagination>
+    </div>
+  );
 }
 
-export default Chevrons
+export default Chevrons;

@@ -179,12 +179,13 @@ function Tickets() {
             </div>
           </div>
           <div className="border-[#8C847E]">
-            <div className="grid lg:grid-cols-[2fr_3fr_3fr_1fr_1fr_auto] max-lg:grid-cols-[2fr_3fr_1fr_auto] max-sm:grid-cols-[2fr_3fr_auto] gap-4 items-center font-bold bg-[#FFFBF5] py-2 px-3 text-[#8C847E]">
+            <div className="grid 2xl:grid-cols-[3fr_3fr_4fr_2fr_1fr_2fr_auto] lg:grid-cols-[3fr_4fr_4fr_2fr_1fr_auto] max-lg:grid-cols-[2fr_3fr_1fr_auto] max-sm:grid-cols-[2fr_3fr_auto] gap-4 items-center font-bold bg-[#FFFBF5] py-2 px-3 text-[#8C847E]">
               <p>Nome</p>
               <p className="max-lg:hidden">E-mail</p>
               <p>Título</p>
               <p className="max-lg:hidden">Status</p>
               <p className="max-sm:hidden">Prioridade</p>
+              <p className="max-2xl:hidden">Ultima atualização</p>
               <span className="w-6 h-6"></span>
             </div>
 
@@ -192,10 +193,23 @@ function Tickets() {
               <ul className="flex flex-col text-[#5A2C40]">
                 {displayedTickets.map((ticketItem) => {
                   const priorityInfo = getPriorityInfo(ticketItem.priority);
+                  const dataISO = ticketItem.updated_at;
+                  const data = new Date(dataISO);
+                  const opcoes = {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  };
+                  const dataFormatada = new Intl.DateTimeFormat(
+                    "pt-BR",
+                    opcoes
+                  ).format(data);
                   return (
                     <li
                       key={ticketItem.id}
-                      className="grid lg:grid-cols-[2fr_3fr_3fr_1fr_1fr_auto] max-lg:grid-cols-[2fr_3fr_1fr_auto] max-sm:grid-cols-[2fr_3fr_auto] max-md:px-2 md:px-4 divide-x-1 divide-[#8C847E] gap-4 items-center border-t border-gray-200 bg-[#FFFBF5] py-2 font-semibold"
+                      className="grid 2xl:grid-cols-[3fr_3fr_4fr_2fr_1fr_2fr_auto] lg:grid-cols-[3fr_4fr_4fr_2fr_1fr_auto] max-lg:grid-cols-[2fr_3fr_1fr_auto] max-sm:grid-cols-[2fr_3fr_auto] max-md:px-2 md:px-4 divide-x-1 divide-[#8C847E] gap-4 items-center border-t border-gray-200 bg-[#FFFBF5] py-2 font-semibold"
                     >
                       <div className="grid grid-cols-[auto_1fr] items-center gap-2 truncate">
                         <User size={16} />
@@ -221,6 +235,8 @@ function Tickets() {
                       <p className={`max-sm:hidden ${priorityInfo.className}`}>
                         {priorityInfo.text}
                       </p>
+
+                      <p className="max-2xl:hidden">{dataFormatada}</p>
 
                       <button className="text-[#8B4571] flex justify-center">
                         <Search
@@ -258,6 +274,8 @@ function Tickets() {
           openEdit={openEdit}
           ticketInfo={ticket}
           onTicketDeleted={handleTicketDeleted}
+          loading={loading}
+          setLoading={setLoading}
         />
       )}
       {isCommentsOpen && (

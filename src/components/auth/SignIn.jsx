@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { auth } from "../../services/firebaseConfig";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import api from "../../services/api";
+import { toast } from "sonner";
 
 function SignIn() {
   const [email, setEmail] = useState("");
@@ -22,18 +23,21 @@ function SignIn() {
 
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      
       nav("/");
 
     } catch (error) {
       console.error("Erro Firebase:", error);
-      alert("Erro ao se conectar");
+      toast("Erro ao se conectar");
       nav("/"); 
     }
 
   } catch (apiError) {
     console.error("Erro de login na API:", apiError);
-    alert("Email ou senha inválidos.");
+    toast.error("Email ou senha inválidos.", {
+      position: "bottom-left",
+      duration: 3000,
+      style: { background: '#FFFBF5', color: '#5A2C40' }
+    });
   }
 };
 

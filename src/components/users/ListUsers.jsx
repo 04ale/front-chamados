@@ -3,6 +3,8 @@ import api from "../../services/api";
 import { useAuth } from "../../hooks/useAuth";
 import { Search, Trash, User } from "lucide-react";
 import CountTickets from "./CountTickets";
+import { toast } from "sonner";
+import Toast from "../Toast";
 
 function ListUsers() {
   const { user } = useAuth();
@@ -49,20 +51,41 @@ function ListUsers() {
 
   async function delUser(userInfo) {
     try {
-      let res = confirm(
-        `Tem certeza que deseja deletar o usuário ${userInfo.name} ?`
-      );
-      if (res) {
-        await api.delete(`/auth/${userInfo.id}/delete`, {
-          headers: {
-            Authorization: `Bearer ${user.token}`,
+      toast.custom(
+        (t) => (
+          <Toast
+            toastId={t}
+            title="Confirmar Exclusão"
+            description="Tem certeza que deseja excluir este usuário?"
+            confirmText="Sim, excluir"
+            onConfirm={async () => {
+              await api.delete(`/auth/${userInfo.id}/delete`, {
+                headers: {
+                  Authorization: `Bearer ${user.token}`,
+                },
+              });
+              toast.success("Usuário deletado com sucesso!");
+              getUsers();
+            }}
+          />
+        ),
+        {
+          duration: Infinity,
+          classNames: {
+            toast: "w-full p-0 border-none bg-transparent shadow-none",
           },
-        });
-        alert("Usuário deletado com sucesso!");
-        getUsers();
+          position: "top-center",
+        }
+      );
+
+      {
+        /** 
+      if (res) {
+        
+      }*/
       }
     } catch (error) {
-      alert("Erro ao deletar usuário", error);
+      toast.error("Erro ao deletar usuário", error);
       console.error("ERRO: ", error);
     }
   }

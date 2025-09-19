@@ -15,6 +15,7 @@ import CommentItem from "./CommentItem";
 
 import { storage } from "../../services/firebaseConfig";
 import { uploadBytes, ref } from "firebase/storage";
+import { toast } from "sonner";
 
 function Comments({
   closeComments,
@@ -46,7 +47,7 @@ function Comments({
     e.preventDefault();
 
     if (!body.trim() && files.length === 0) {
-      alert("Por favor escreva um comentário.");
+      toast.info("Por favor escreva um comentário.");
       return;
     }
 
@@ -77,13 +78,13 @@ function Comments({
         }
       }
 
-      alert("Comentário adicionado com sucesso!");
+      toast.success("Comentário adicionado com sucesso!");
       setBody("");
       setFiles([]);
       getComments();
     } catch (error) {
       console.error("Erro ao criar comentário:", error);
-      alert("Ocorreu um erro ao enviar o comentário.");
+      toast.error("Ocorreu um erro ao enviar o comentário.");
     }
   }
 
@@ -120,7 +121,7 @@ function Comments({
     if (e.target.files) {
       const newFiles = Array.from(e.target.files);
       if (files.length + newFiles.length > 3) {
-        alert("Você pode anexar no máximo 3 arquivos.");
+        toast.warning("Você pode anexar no máximo 3 arquivos.");
         return;
       }
       setFiles((prevFiles) => [...prevFiles, ...newFiles]);
@@ -247,8 +248,8 @@ function Comments({
                   onChange={(e) => setBody(e.target.value)}
                 />
                 <div className="w-3/20 grid grid-cols-1">
-                  <label>
-                    <input type="file" hidden onChange={handleImageChange} />
+                  <label> 
+                    <input type="file" hidden onChange={handleImageChange} accept="image/png, image/jpeg" name="image" />
                     <div className="border-1 border-[#5A2C40]/40 bg-[#8B4571]/10 h-full rounded-tr-lg flex justify-center cursor-pointer items-center text-center">
                       <Paperclip />
                     </div>

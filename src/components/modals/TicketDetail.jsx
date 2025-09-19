@@ -2,11 +2,13 @@
 import { useState, useEffect } from "react";
 import api from "../../services/api";
 import { useAuth } from "../../hooks/useAuth";
-import { User, X } from "lucide-react";
+import { AlertTriangle, User, X } from "lucide-react";
 import { storage } from "../../services/firebaseConfig";
 import { ref, listAll, getDownloadURL } from "firebase/storage";
 
 import { Link } from "react-router-dom";
+import { toast } from "sonner";
+import Toast from "../Toast";
 
 function TicketDetail({
   closeDetails,
@@ -14,11 +16,12 @@ function TicketDetail({
   openEdit,
   ticketInfo,
   onTicketDeleted,
+  loading,
+  setLoading,
 }) {
   const { user, isAdmin } = useAuth();
   const [ticket, setTicket] = useState(null);
   const [imageUrls, setImageUrls] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [imageUrl, setImageUrl] = useState([]);
 
   const [isImageOpen, setIsImageOpen] = useState(false);
@@ -37,8 +40,11 @@ function TicketDetail({
           });
       })
       .catch((error) => {
-        alert("Erro");
+        toast.error("Erro");
         console.error("ERRO: ", error);
+      })
+      .finally(() => {
+        setLoading(false);
       });
   }, [ticketInfo.id]);
 
@@ -66,29 +72,43 @@ function TicketDetail({
   useEffect(() => {
     if (ticketInfo.id) {
       getTicket(ticketInfo.id);
-      getImages(ticketInfo.id);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ticketInfo.id]);
 
   async function handleDeleteTicket(id) {
     try {
-      let res = confirm("Tem certeza que deseja exluir esse ticket?");
-
-      if (res) {
-        await api.delete(`/tickets/${id}`, {
-          headers: {
-            Authorization: `Bearer ${user.token}`,
+      toast.custom(
+        (t) => (
+          <Toast
+            toastId={t}
+            title="Confirmar Exclusão"
+            description="Tem certeza que deseja excluir este ticket?"
+            confirmText="Sim, excluir"
+            onConfirm={async () => {
+              await api.delete(`/tickets/${id}`, {
+                headers: {
+                  Authorization: `Bearer ${user.token}`,
+                },
+              });
+              onTicketDeleted(id);
+              closeDetails();
+              console.log(`Ticket com ID ${id} foi excluído!`);
+              toast.success("Ticket excluído com sucesso!");
+            }}
+          />
+        ),
+        {
+          duration: Infinity,
+          classNames: {
+            toast: "w-full p-0 border-none bg-transparent shadow-none",
           },
-        });
-
-        alert("Ticket excluído com sucesso!");
-        onTicketDeleted(id);
-        closeDetails();
-      }
+          position: "top-center"
+        }
+      );
     } catch (error) {
       console.error("Erro ao excluir ticket:", error);
-      alert("Não foi possível excluir o ticket. Tente novamente.");
+      toast.error("Não foi possível excluir o ticket. Tente novamente.");
     }
   }
   async function getTicket(id) {
@@ -102,8 +122,6 @@ function TicketDetail({
         setTicket(response.data);
       } catch (error) {
         console.error("ERRO: ", error);
-      } finally {
-        setLoading(false);
       }
     }
   }
@@ -116,7 +134,7 @@ function TicketDetail({
         },
       });
     } catch (error) {
-      alert("Erro ao adicionar imagem.");
+      toast.error("Erro ao adicionar imagem.");
       console.error("ERRO: ", error);
     }
   }
@@ -136,10 +154,12 @@ function TicketDetail({
     }
   }
 
-  if (loading) {
+  if (loading && imageUrls.length === 0) {
     return (
-      <div className="h-screen w-screen fixed ... flex justify-center items-center">
-        <div className="">Carregando detalhes do ticket...</div>
+      <div className="h-screen w-screen fixed flex justify-center items-center z-50">
+        <div className="font-4xl font-bold">
+          Carregando detalhes do ticket...
+        </div>
       </div>
     );
   }
@@ -208,7 +228,11 @@ function TicketDetail({
                 key={index}
                 className="flex flex-row justify-around w-full gap-2"
               >
-                <Link to={`/photo?url=${encodeURIComponent(image)}`} target="_blank" rel="noopener noreferrer">
+                <Link
+                  to={`/photo?url=${encodeURIComponent(image)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   <img
                     src={image}
                     className="border border-gray-300 space-x-1 rounded-lg w-[280px] lg:h-[280px] md:h-[240px] sm:h-[200px] max-sm:h-[250px]"

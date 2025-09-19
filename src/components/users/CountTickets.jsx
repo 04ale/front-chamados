@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../../services/api";
 import { useAuth } from "../../hooks/useAuth";
+import { toast } from "sonner";
 
 function CountTickets({ userInfo }) {
   const [count, setCount] = useState([]);
@@ -16,7 +17,7 @@ function CountTickets({ userInfo }) {
         });
         setCount(res.data.tickets.length);
       } catch (error) {
-        alert("Erro");
+        toast.error("Erro");
         console.error("ERRO: ", error);
       }
     }
