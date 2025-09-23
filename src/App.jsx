@@ -4,11 +4,12 @@ import Home from "./pages/Home";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
 import { useAuth } from "./hooks/useAuth";
-import Users from "./pages/Users";
+import Users from "./pages/ListUsers";
 import PhotoDetail from "./pages/PhotoDetail";
 import { useEffect } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "./services/firebaseConfig";
+import User from "./pages/User";
 
 function App() {
   const { isLoggedIn, isAdmin } = useAuth();
@@ -29,6 +30,7 @@ function App() {
       <Route path="/login" element={isLoggedIn ? <Navigate to='/'/> : <Login /> } />
       <Route path="/register" element={isAdmin ? <Register />  : <Navigate to='/'/> } />
       <Route path="/" element={!isLoggedIn ? <Navigate to='/login'/> : <Home /> } />
+      <Route path="/user" element={isLoggedIn ? <User /> : <Navigate to='/login'/> } />
       <Route path="/users" element={isAdmin ? <Users />  : <Navigate to='/'/> } />
       <Route path="/photo" element={<PhotoDetail />}/>
 

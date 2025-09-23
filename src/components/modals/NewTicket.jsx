@@ -54,21 +54,30 @@ function NewTicket({ onClose }) {
   }
 
   const handleDrop = (e) => {
-    e.preventDefault();
-    if (e.dataTransfer.files) {
-      setFileType(e.dataTransfer.files[0].type);
-      if (fileType !== "image/png" && fileType !== "image/jpeg") {
-        toast.warning("Apenas arquivos PNG ou JPEG são permitidos.");
-        return;
-      }
-      const newFiles = Array.from(e.dataTransfer.files);
-      if (files.length + newFiles.length > 3) {
-        toast.warning("Você pode anexar no máximo 3 arquivos.");
-        return;
-      }
-      setFiles((prevFiles) => [...prevFiles, ...newFiles]);
+  e.preventDefault();
+
+  if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+    const newFiles = Array.from(e.dataTransfer.files);
+
+    const allFilesAreValid = newFiles.every(file => 
+      file.type === "image/png" || file.type === "image/jpeg"
+    );
+
+    if (!allFilesAreValid) {
+      toast.warning("Apenas arquivos PNG ou JPEG são permitidos.");
+      return;
     }
-  };
+
+    if (files.length + newFiles.length > 3) {
+      toast.warning("Você pode anexar no máximo 3 arquivos.");
+      return;
+    }
+
+    setFiles((prevFiles) => [...prevFiles, ...newFiles]);
+
+    setFileType(newFiles[0].type); 
+  }
+};
 
   const handleDragOver = (e) => {
     e.preventDefault();
@@ -107,18 +116,20 @@ function NewTicket({ onClose }) {
         </div>
         <form className="grid gap-4" onSubmit={createTicket}>
           <div className="grid gap-2 ">
-            <label className="text-sm font-medium"> Título</label>
+            <label className="text-sm font-medium">Título</label>
             <input
               type="text"
               className="w-full rounded-md p-2 bg-[#5A2C40] text-white focus:outline-none "
+              placeholder="Título"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
             />
           </div>
           <div className="grid gap-2 ">
-            <label className="text-sm font-medium "> Descrição</label>
+            <label className="text-sm font-medium ">Descrição</label>
             <textarea
               className="w-full rounded-md p-2 bg-[#5A2C40] text-white focus:outline-none text-sm"
+              placeholder="Descrição"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
             />

@@ -56,7 +56,7 @@ function ListUsers() {
           <Toast
             toastId={t}
             title="Confirmar Exclusão"
-            description="Tem certeza que deseja excluir este usuário?"
+            description={`Tem certeza que deseja excluir o(a) ${userInfo.name}`}
             confirmText="Sim, excluir"
             onConfirm={async () => {
               await api.delete(`/auth/${userInfo.id}/delete`, {
@@ -128,8 +128,9 @@ function ListUsers() {
                   <p className="max-sm:hidden">
                     {capitalizeFirstLetter(user.role)}
                   </p>
-
-                  <CountTickets userInfo={user} />
+                  <div className="max-sm:hidden">
+                    <CountTickets userInfo={user} />
+                  </div>
 
                   <button className="text-red-500 flex justify-center">
                     <Trash

@@ -125,4 +125,32 @@ html, body, #root {
   body {
     @apply bg-background text-foreground;
   }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #5A2C40 transparent;
+  }
+
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: #5A2C40; 
+    border-radius: 14px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: #8B4B72; 
+  }
+
+  ::-webkit-scrollbar-button:start:decrement,
+  ::-webkit-scrollbar-button:end:increment  {
+	display: none;
+  }
 }

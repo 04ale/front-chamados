@@ -9,6 +9,7 @@ import { ref, listAll, getDownloadURL } from "firebase/storage";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import Toast from "../Toast";
+import ImageWithLoader from "@/components/ImageWithLoader";
 
 function TicketDetail({
   closeDetails,
@@ -16,37 +17,14 @@ function TicketDetail({
   openEdit,
   ticketInfo,
   onTicketDeleted,
-  loading,
-  setLoading,
 }) {
   const { user, isAdmin } = useAuth();
   const [ticket, setTicket] = useState(null);
   const [imageUrls, setImageUrls] = useState([]);
   const [imageUrl, setImageUrl] = useState([]);
-
+  const [loading, setLoading] = useState(true);
   const [isImageOpen, setIsImageOpen] = useState(false);
   const listRef = ref(storage, `/tickets/${ticketInfo.id}`);
-
-  useEffect(() => {
-    listAll(listRef)
-      .then((res) => {
-        const images = res.items.map((item) => getDownloadURL(item));
-        Promise.all(images)
-          .then((urls) => {
-            setImageUrls(urls);
-          })
-          .catch((error) => {
-            console.error("ERRO: ", error);
-          });
-      })
-      .catch((error) => {
-        toast.error("Erro");
-        console.error("ERRO: ", error);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, [ticketInfo.id]);
 
   const capitalizeFirstLetter = (string) => {
     if (!string || string.length === 0) {
@@ -58,21 +36,40 @@ function TicketDetail({
     return firstLetter + restOfWord;
   };
 
-  const dataISO = ticketInfo.created_at;
-  const data = new Date(dataISO);
-  const opcoes = {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  };
-  const dataFormatada = new Intl.DateTimeFormat("pt-BR", opcoes).format(data);
-
   useEffect(() => {
-    if (ticketInfo.id) {
-      getTicket(ticketInfo.id);
-    }
+    if (!ticketInfo.id) return;
+
+    const fetchAllData = async () => {
+      setLoading(true);
+
+      try {
+        const imagesPromise = listAll(listRef).then((res) => {
+          const downloadPromises = res.items.map((item) =>
+            getDownloadURL(item)
+          );
+          return Promise.all(downloadPromises);
+        });
+
+        const ticketDetailsPromise = api.get(`/tickets/${ticketInfo.id}`, {
+          headers: { Authorization: `Bearer ${user.token}` },
+        });
+
+        const [urls, ticketResponse] = await Promise.all([
+          imagesPromise,
+          ticketDetailsPromise,
+        ]);
+
+        setImageUrls(urls);
+        setTicket(ticketResponse.data);
+      } catch (error) {
+        console.error("ERRO ao buscar detalhes do ticket:", error);
+        toast.error("Não foi possível carregar os detalhes do ticket.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAllData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ticketInfo.id]);
 
@@ -103,7 +100,7 @@ function TicketDetail({
           classNames: {
             toast: "w-full p-0 border-none bg-transparent shadow-none",
           },
-          position: "top-center"
+          position: "top-center",
         }
       );
     } catch (error) {
@@ -125,7 +122,7 @@ function TicketDetail({
       }
     }
   }
-
+  /** 
   async function getImages(id) {
     try {
       const res = await api.get(`/files/${id}`, {
@@ -138,7 +135,7 @@ function TicketDetail({
       console.error("ERRO: ", error);
     }
   }
-
+*/
   function change(info) {
     if (info === "low") {
       info = "pequena";
@@ -154,15 +151,17 @@ function TicketDetail({
     }
   }
 
-  if (loading && imageUrls.length === 0) {
+  if (loading) {
     return (
-      <div className="h-screen w-screen fixed flex justify-center items-center z-50">
-        <div className="font-4xl font-bold">
-          Carregando detalhes do ticket...
-        </div>
+      <div className="h-screen w-screen fixed flex top-0 left-0 bg-black/60 justify-center items-center z-40">
+        <p className="text-white text-4xl font-bold">
+          Carregando...
+        </p>
       </div>
     );
   }
+
+  const size = "w-full h-full"
 
   return (
     <div className="h-screen w-screen fixed top-0 left-0 bg-black/60 flex justify-center items-center z-30">
@@ -171,7 +170,7 @@ function TicketDetail({
         className="absolute top-0 right-0 text-white mt-5 mr-5 font-bold cursor-pointer max-md:mt-17"
         size={40}
       />
-      <div className="max-sm:mx-[20px] sm:mx-[40px] md:mx-[60px] lg:w-[900px] max-h-[80vh] overflow-auto text-[#5A2C40] bg-[#FFFBF5] rounded-lg p-6">
+      <div className="max-sm:mx-[20px] sm:mx-[40px] md:mx-[60px] lg:w-[900px] max-h-[80vh] overflow-auto scrollbar-hide text-[#5A2C40] bg-[#FFFBF5] rounded-lg p-6">
         {" "}
         <div className="flex flex-col gap-4 mb-10">
           <div>
@@ -184,7 +183,15 @@ function TicketDetail({
               </div>
               <div>
                 <p>Criado em:</p>{" "}
-                <p className="font-semibold">{dataFormatada}</p>
+                <p className="font-semibold">
+                  {new Intl.DateTimeFormat("pt-BR", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  }).format(new Date(ticketInfo.created_at))}
+                </p>
               </div>
             </div>
             <p className="text-sm text-[#8C847E]">{ticketInfo.creator.email}</p>
@@ -233,7 +240,7 @@ function TicketDetail({
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <img
+                  <ImageWithLoader
                     src={image}
                     className="border border-gray-300 space-x-1 rounded-lg w-[280px] lg:h-[280px] md:h-[240px] sm:h-[200px] max-sm:h-[250px]"
                   />

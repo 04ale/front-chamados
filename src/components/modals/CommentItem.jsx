@@ -3,6 +3,8 @@ import { ref, listAll, getDownloadURL } from "firebase/storage";
 import { storage } from "../../services/firebaseConfig";
 import { User } from "lucide-react";
 import { Link } from "react-router-dom";
+import ImageWithLoader from "@/components/ImageWithLoader";
+import SeeMore from "../SeeMore";
 
 function CommentItem({ comment, currentUser }) {
   const [imageUrls, setImageUrls] = useState([]);
@@ -60,9 +62,7 @@ function CommentItem({ comment, currentUser }) {
           {isCurrentUser && <User size={16} />}
         </div>
 
-        <p className="text-lg break-words" style={{ color: "#5A2C40" }}>
-          {comment.body}
-        </p>
+        <SeeMore>{comment.body}</SeeMore>
         <div className="mt-2 flex gap-2 flex-wrap">
           {imageUrls.map((image, index) => (
             <Link
@@ -71,10 +71,9 @@ function CommentItem({ comment, currentUser }) {
               key={index}
               rel="noopener noreferrer"
             >
-              <img
-                
+              <ImageWithLoader
                 src={image}
-                className="w-20 h-20 object-cover rounded-md border"
+                className="border border-gray-300 rounded-md space-x-1 w-20 h-20"
               />
             </Link>
           ))}

@@ -45,7 +45,7 @@ function Navbar() {
     try {
       await signOut(auth);
       console.log("Usuário deslogado do Firebase.");
-      
+
       logout();
     } catch (error) {
       console.error("Erro ao fazer logout:", error);
@@ -53,7 +53,7 @@ function Navbar() {
   };
   return (
     <nav className="flex flex-col">
-      <div className="p-3 md:hidden px-6 w-full fixed top-0 text-[#F7F0E4] border-b border-b-[#F7F0E4]/10 bg-[#5A2C40] shadow-md flex justify-between items-center">
+      <div className="p-3 md:hidden px-6 w-full fixed top-0 text-[#F7F0E4] border-b border-b-[#F7F0E4]/10 bg-[#5A2C40] shadow-md flex justify-between items-center z-20">
         <img src={logo1} className="w-auto h-8 max-sm:hidden" />
         <img src={logo2} className="h-8 sm:hidden" />
 
@@ -106,15 +106,14 @@ function Navbar() {
                 </div>
               </>
             )}
-
-            <div className="w-24 h-[1px] bg-[#F7F0E4]/30 self-center"></div>
-            {isLoggedIn && (
-              <div className="flex items-center gap-4 cursor-pointer">
-                <User size={32} />
-                <p className="text-3xl font-semibold">Usuário</p>
-              </div>
-            )}
-
+            <hr className="w-40 h-[1px] text-gray-200 self-center" />
+            <div
+              className="flex items-center gap-4 cursor-pointer"
+              onClick={() => nav("/user")}
+            >
+              <User size={32} />
+              <p className="text-3xl font-semibold">Usuário</p>
+            </div>
             <div
               onClick={handleLogout}
               className="flex items-center gap-4 cursor-pointer"
@@ -172,10 +171,13 @@ function Navbar() {
         </div>
         <div className="flex flex-col gap-7 max-xl:items-center">
           {isLoggedIn && (
-            <div className="flex items-center font-semibold flex-row gap-3 p-3 rounded-lg transition-all duration-300 cursor-pointer hover:bg-[#8B4571] hover:translate-x-2">
+            <div
+              className="flex items-center font-semibold flex-row gap-3 p-3 rounded-lg transition-all duration-300 cursor-pointer hover:bg-[#8B4571] hover:translate-x-2"
+              onClick={() => nav("/user")}
+            >
               <User className="cursor-pointer items-center" size={30} />
               <p className="max-xl:hidden cursor-pointer text-xl break-words">
-                {user.name.split(' ').slice(0, 1)}
+                {user.name.split(" ").slice(0, 1)}
               </p>
             </div>
           )}
@@ -189,7 +191,7 @@ function Navbar() {
           </div>
         </div>
       </div>
-      {isModalOpen && <NewTicket onClose={closeModal}/>}
+      {isModalOpen && <NewTicket onClose={closeModal} />}
     </nav>
   );
 }

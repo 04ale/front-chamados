@@ -24,7 +24,7 @@ function CountTickets({ userInfo }) {
     countTickets()
   }, []);
 
-  return <div className="max-sm:hidden">{count}</div>;
+  return <div className="">{count}</div>;
 }
 
 export default CountTickets;

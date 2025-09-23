@@ -46,6 +46,11 @@ function Comments({
   async function createComment(e) {
     e.preventDefault();
 
+    if (body.length > 1024){
+    toast.warning("Sua mensagem excedeu o limite de caracteres. Tente encurtar sua mensagem.")
+    return;
+    }
+
     if (!body.trim() && files.length === 0) {
       toast.info("Por favor escreva um comentário.");
       return;
@@ -285,8 +290,8 @@ function Comments({
               )}
             </div>
           </form>
-
-          <ul className="flex flex-col gap-4 p-4 max-h-[600px] w-full overflow-y-auto">
+          {comments.length < 1 && (<p className="text-center py-4 text-gray-500">Nenhum comentário encontrado</p>)}
+          <ul className="flex flex-col gap-4 p-4 max-h-[500px] w-full overflow-y-auto">
             {comments.map((comment) => (
               <CommentItem
                 key={comment.id}

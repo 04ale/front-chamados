@@ -72,7 +72,7 @@ function PaginationPrevious({
       {...props}
     >
       <ChevronLeftIcon />
-      <span className="hidden sm:block">Anterior</span>
+      <span className="hidden sm:block">Voltar</span>
     </PaginationLink>
   );
 }
@@ -90,7 +90,7 @@ function PaginationFirst({ className, setCurrentPage, ...props }) {
       {...props}
     >
       <ChevronsLeftIcon />
-      <span className="hidden sm:block">Primeira</span>
+      <span className="hidden sm:block">Início</span>
     </PaginationLink>
   );
 }
@@ -107,7 +107,7 @@ function PaginationNext({ className, setCurrentPage, currentPage, ...props }) {
       )}
       {...props}
     >
-      <span className="hidden sm:block">Próxima</span>
+      <span className="hidden sm:block">Avançar</span>
       <ChevronRightIcon />
     </PaginationLink>
   );
@@ -125,7 +125,7 @@ function PaginationLast({ className, setCurrentPage, pagination, ...props }) {
       )}
       {...props}
     >
-      <span className="hidden sm:block">Ultima</span>
+      <span className="hidden sm:block">Fim</span>
       <ChevronsRightIcon />
     </PaginationLink>
   );

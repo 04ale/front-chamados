@@ -2,10 +2,6 @@ import { useState, useEffect, useRef } from "react";
 import api from "../../services/api";
 import { useAuth } from "../../hooks/useAuth";
 import {
-  ChevronLeft,
-  ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
   User,
   Search,
 } from "lucide-react";
@@ -274,8 +270,6 @@ function Tickets() {
           openEdit={openEdit}
           ticketInfo={ticket}
           onTicketDeleted={handleTicketDeleted}
-          loading={loading}
-          setLoading={setLoading}
         />
       )}
       {isCommentsOpen && (
