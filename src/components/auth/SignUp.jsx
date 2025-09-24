@@ -67,7 +67,7 @@ function SignUp() {
             </div>
             <button
               type="submit"
-              className="px-7 cursor-pointer font-semibold p-4 bg-[#5A2C40] hover:bg-[#8B4571] duration-300 transition-all text-white rounded-2xl"
+              className="px-7 cursor-pointer font-semibold p-4 bg-[#5A2C40] hover:bg-[#8B4571] duration-300 transition-all text-white rounded-lg"
             >
               Cadastrar
             </button>

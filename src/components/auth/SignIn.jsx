@@ -8,10 +8,12 @@ import { auth } from "../../services/firebaseConfig";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import api from "../../services/api";
 import { toast } from "sonner";
+import ResetPassword from "../modals/ResetPassword";
 
 function SignIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false)
   const { login } = useAuth();
   const nav = useNavigate();
 
@@ -69,16 +71,18 @@ function SignIn() {
             </div>
             <button
               type="submit"
-              className="px-7 cursor-pointer font-semibold p-4 bg-[#5A2C40] hover:bg-[#8B4571] text-white rounded-2xl"
+              className="px-7 cursor-pointer font-semibold p-4 bg-[#5A2C40] duration-300 transition-all hover:bg-[#8B4571] text-white rounded-lg"
             >
               Login
             </button>
+            <p className="text-sm text-gray-500 cursor-pointer" onClick={()=> setIsModalOpen(true)}>Esqueceu a senha?</p>
           </div>
         </div>
       </form>
       <div className="max-lg:hidden lg:w-1/2 h-screen">
         <img src={banner} className="h-full w-full " />
       </div>
+      {isModalOpen && <ResetPassword closeModal={()=>setIsModalOpen(false)}/>}
     </div>
   );
 }

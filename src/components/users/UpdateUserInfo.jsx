@@ -67,14 +67,31 @@ function UpdateUserInfo() {
         toast.error("Erro ao atualizar informações.");
       }
     } catch (error) {
-      let errorMessage = "Ocorreu um erro ao atualizar.";
-
-      if (error.code === "auth/requires-recent-login") {
-        errorMessage = "Sua sessão é muito antiga. Por favor, faça logout e login novamente para alterar seus dados.";
-      }
-
-      console.error("ERRO AO ATUALIZAR INFORMAÇÕES: ", errorMessage)
+  let errorMessage = "Ocorreu um erro ao atualizar as informações.";
+  
+  // 2. Erros  do Firebase
+  if (error.code) {
+    switch (error.code) {
+      case 'auth/requires-recent-login':
+        errorMessage = "Sua sessão é muito antiga. Por favor, faça login novamente para alterar seus dados.";
+        break;
+      case 'auth/email-already-in-use':
+        errorMessage = "Este e-mail já está sendo usado por outra conta.";
+        break;
+      case 'auth/weak-password':
+        errorMessage = "A senha deve ter no mínimo 6 caracteres.";
+        break;
+      default:
+        errorMessage = "Erro do Firebase: " + error.message;
     }
+  } 
+  else if (error.response?.data?.message) {
+    errorMessage = "Erro do servidor: " + error.response.data.message;
+  }
+  
+  toast.error(errorMessage);
+  console.error("Error updating user info:", error);
+}
   };
 
   if (!user) {
