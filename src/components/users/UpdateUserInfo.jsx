@@ -1,7 +1,6 @@
 import { useAuth } from "@/hooks/useAuth";
 import React, { useState } from "react";
 import CountTickets from "./CountTickets";
-import { updateEmail, updatePassword } from "firebase/auth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,7 +8,6 @@ import { Label } from "@/components/ui/label";
 import { Mail, Shield, Ticket, Settings, Edit } from "lucide-react";
 import { toast } from "sonner";
 import api from "@/services/api";
-import { auth } from "@/services/firebaseConfig";
 
 function UpdateUserInfo() {
   const { user } = useAuth();
@@ -28,25 +26,6 @@ function UpdateUserInfo() {
     }
 
     try {
-      const fbUser = auth.currentUser;
-      if (!fbUser) {
-        toast.error("Usuário não autenticado no Firebase.");
-        return;
-      }
-
-      if (password.length < 6 && password.length > 0) {
-        toast.warning("A senha deve ter no mínimo 6 caracteres");
-      }
-      if (email && password.length < 1) {
-        await updateEmail(fbUser, email);
-        toast.success("E-mail atualizado com sucesso");
-      }
-      if (password && email) {
-        await updateEmail(fbUser, email);
-        await updatePassword(fbUser, password);
-        toast.success("Informações atualizadas com sucesso!");
-      }
-
       const res = await api.patch(
         `/users/${user.id}`,
         {

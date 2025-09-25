@@ -6,6 +6,7 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { v4 } from "uuid";
 import { storage } from "../../services/firebaseConfig";
 import { toast } from "sonner";
+import { getAuth } from "firebase/auth";
 
 function NewTicket({ onClose }) {
   const [title, setTitle] = useState("");
@@ -19,11 +20,23 @@ function NewTicket({ onClose }) {
 
   async function createTicket(e) {
     e.preventDefault();
+    const auth = getAuth();
+    const firebaseUser = auth.currentUser;
+
+    if (!firebaseUser) {
+      toast.error("Erro de autenticação. Faça login novamente.");
+      console.error(
+        "Usuário do Firebase não encontrado. O login com token customizado pode ter falhado."
+      );
+      return;
+    }
+    const firebaseUserId = firebaseUser.uid;
+
     try {
       const id = v4();
       const filesUrls = await Promise.all(
         files.map(async (file) => {
-          const imageRef = ref(storage, `tickets/${id}/${file.name}`);
+          const imageRef = ref(storage, `tickets/${firebaseUserId}/${id}/${file.name}`);
           await uploadBytes(imageRef, file);
           return await getDownloadURL(imageRef);
         })
@@ -48,36 +61,40 @@ function NewTicket({ onClose }) {
       onClose();
       window.location.reload();
     } catch (error) {
-      toast.error("Erro ao criar o ticket, tente novamente");
-      console.log("ERRO: ", error);
+      if (error.code === 'storage/unauthorized') {
+        toast.error("Você não tem permissão para enviar arquivos.");
+      } else {
+        toast.error("Erro ao criar o ticket, tente novamente");
+      }
+      console.log("ERRO AO CRIAR TICKET: ", error);
     }
   }
 
   const handleDrop = (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-    const newFiles = Array.from(e.dataTransfer.files);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const newFiles = Array.from(e.dataTransfer.files);
 
-    const allFilesAreValid = newFiles.every(file => 
-      file.type === "image/png" || file.type === "image/jpeg"
-    );
+      const allFilesAreValid = newFiles.every(
+        (file) => file.type === "image/png" || file.type === "image/jpeg"
+      );
 
-    if (!allFilesAreValid) {
-      toast.warning("Apenas arquivos PNG ou JPEG são permitidos.");
-      return;
+      if (!allFilesAreValid) {
+        toast.warning("Apenas arquivos PNG ou JPEG são permitidos.");
+        return;
+      }
+
+      if (files.length + newFiles.length > 3) {
+        toast.warning("Você pode anexar no máximo 3 arquivos.");
+        return;
+      }
+
+      setFiles((prevFiles) => [...prevFiles, ...newFiles]);
+
+      setFileType(newFiles[0].type);
     }
-
-    if (files.length + newFiles.length > 3) {
-      toast.warning("Você pode anexar no máximo 3 arquivos.");
-      return;
-    }
-
-    setFiles((prevFiles) => [...prevFiles, ...newFiles]);
-
-    setFileType(newFiles[0].type); 
-  }
-};
+  };
 
   const handleDragOver = (e) => {
     e.preventDefault();

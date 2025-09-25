@@ -4,8 +4,6 @@ import logo from "../../assets/img/logoVinho.png";
 import banner from "../../assets/img/banner.png";
 import api from "../../services/api";
 import { useAuth } from "../../hooks/useAuth";
-import { auth } from "../../services/firebaseConfig";
-import { createUserWithEmailAndPassword } from "firebase/auth";
 import { toast } from "sonner";
 
 function SignUp() {
@@ -25,7 +23,6 @@ function SignUp() {
           },
         }
       );
-      await createUserWithEmailAndPassword(auth, email, res.data.senha);
       console.log(
         "Senha do " + res.data.user.name + ": " + res.data.senha
       );

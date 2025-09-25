@@ -4,8 +4,6 @@ import logo from "../../assets/img/logoVinho.png";
 import banner from "../../assets/img/banner.png";
 import { useAuth } from "../../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
-import { auth } from "../../services/firebaseConfig";
-import { signInWithEmailAndPassword } from "firebase/auth";
 import api from "../../services/api";
 import { toast } from "sonner";
 import ResetPassword from "../modals/resetPassword/ResetPassword";
@@ -30,7 +28,6 @@ function SignIn() {
       login(res.data);
 
       try {
-        await signInWithEmailAndPassword(auth, email, password);
         nav("/");
       } catch (error) {
         console.error("Erro Firebase:", error);

@@ -1,7 +1,4 @@
-import { useAuth } from "@/hooks/useAuth";
 import api from "@/services/api";
-import { auth } from "@/services/firebaseConfig";
-import { updatePassword } from "firebase/auth";
 import { X } from "lucide-react";
 import React, { useState } from "react";
 import { toast } from "sonner";
