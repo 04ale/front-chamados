@@ -1,36 +1,39 @@
-// Importe as funções necessárias no topo do seu arquivo
-import { getAuth, sendPasswordResetEmail } from "firebase/auth";
-import { toast } from "sonner"; // ou sua biblioteca de toasts
+import { toast } from "sonner";
 import { useState } from "react";
 import { X } from "lucide-react";
+import api from "@/services/api";
 
-function ResetPassword({ closeModal }) {
-  const [email, setEmail] = useState("");
+function ResetPassword({
+  closeModal,
+  setCode,
+  openCodeModal,
+  setEmail,
+  email,
+}) {
   const [loading, setLoading] = useState(false);
 
   const handlePasswordReset = async (e) => {
     e.preventDefault();
     setLoading(true);
 
-    const auth = getAuth();
     try {
-      await sendPasswordResetEmail(auth, email);
-
-      toast.success(
-        "Link de redefinição enviado! Verifique sua caixa de entrada e a pasta de spam."
-      );
+      const res = await api.post("/users/password", {
+        email: email,
+      });
+      setCode(res.data.code);
+      console.log("RESPOSTA DO BACKEND: ", res);
     } catch (error) {
-      if (error.code === "auth/user-not-found") {
-        toast.success(
-          "Se este e-mail estiver cadastrado, um link de redefinição será enviado."
-        );
-      } else {
-        toast.error("Ocorreu um erro: " + error.message);
-      }
-      console.error("Erro ao enviar e-mail de redefinição:", error);
+      console.error("Falha na requisição:", error.response || error);
+
+      const errorMessage =
+        error.response?.data?.message ||
+        "Não foi possível conectar ao servidor.";
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
+    closeModal();
+    openCodeModal();
   };
 
   return (
@@ -47,7 +50,7 @@ function ResetPassword({ closeModal }) {
         >
           <div className="flex gap-2 items-center flex-col">
             <h2 className="text-3xl font-bold">Redefinir Senha</h2>
-            <p className="text-gray-400">
+            <p className="text-[#8C847E]">
               Digite seu e-mail e enviaremos um link para você voltar a acessar
               sua conta.
             </p>
@@ -59,9 +62,13 @@ function ResetPassword({ closeModal }) {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Seu e-mail"
               required
-              className="border border-[#5A2C40]/40 rounded-md py-1 px-4 text-xl w-full"
+              className="border border-[#5A2C40]/50 rounded-md py-1 px-4 text-xl w-full duration-300 transition-all focus:outline-none focus:border-[#5A2C40] focus:ring-2 focus:ring-[#5A2C40]/50"
             />
-            <button type="submit" disabled={loading} className="bg-[#5A2C40] hover:bg-[#8B4571] font-semibold duration-300 transition-all text-white rounded-lg py-2 sm:w-[300px] max-sm:w-full cursor-pointer">
+            <button
+              type="submit"
+              disabled={loading}
+              className="bg-[#5A2C40] hover:bg-[#8B4571] font-semibold duration-300 transition-all text-white rounded-lg py-2 sm:w-[300px] max-sm:w-full cursor-pointer"
+            >
               {loading ? "Enviando..." : "Enviar link de redefinição"}
             </button>
           </div>

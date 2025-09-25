@@ -69,7 +69,6 @@ function UpdateUserInfo() {
     } catch (error) {
   let errorMessage = "Ocorreu um erro ao atualizar as informações.";
   
-  // 2. Erros  do Firebase
   if (error.code) {
     switch (error.code) {
       case 'auth/requires-recent-login':

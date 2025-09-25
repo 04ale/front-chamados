@@ -8,40 +8,44 @@ import { auth } from "../../services/firebaseConfig";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import api from "../../services/api";
 import { toast } from "sonner";
-import ResetPassword from "../modals/ResetPassword";
+import ResetPassword from "../modals/resetPassword/ResetPassword";
+import CodePassword from "../modals/resetPassword/CodePassword";
+import NewPassword from "../modals/resetPassword/NewPassword";
 
 function SignIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [code, setCode] = useState(0);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCodeModalOpen, setIsCodeModalOpen] = useState(false);
+  const [isResetModalOpen, setIsResetModalOpen] = useState(false);
+  const [resetEmail, setResetEmail] = useState("")
   const { login } = useAuth();
   const nav = useNavigate();
 
   const handleSignIn = async (e) => {
-  e.preventDefault();
-  try {
-    const res = await api.post("/auth/login", { email, password });
-    login(res.data); 
-
+    e.preventDefault();
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      nav("/");
+      const res = await api.post("/auth/login", { email, password });
+      login(res.data);
 
-    } catch (error) {
-      console.error("Erro Firebase:", error);
-      toast("Erro ao se conectar");
-      nav("/"); 
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        nav("/");
+      } catch (error) {
+        console.error("Erro Firebase:", error);
+        toast("Erro ao se conectar");
+        nav("/");
+      }
+    } catch (apiError) {
+      console.error("Erro de login na API:", apiError);
+      toast.error("Email ou senha inválidos.", {
+        position: "bottom-left",
+        duration: 3000,
+        style: { background: "#FFFBF5", color: "#5A2C40" },
+      });
     }
-
-  } catch (apiError) {
-    console.error("Erro de login na API:", apiError);
-    toast.error("Email ou senha inválidos.", {
-      position: "bottom-left",
-      duration: 3000,
-      style: { background: '#FFFBF5', color: '#5A2C40' }
-    });
-  }
-};
+  };
 
   return (
     <div className="max-lg:w-[320px] w-full flex flex-row items-center justify-center">
@@ -75,14 +79,35 @@ function SignIn() {
             >
               Login
             </button>
-            <p className="text-sm text-gray-500 cursor-pointer" onClick={()=> setIsModalOpen(true)}>Esqueceu a senha?</p>
+            <p
+              className="text-sm text-[#8C847E] hover:text-[#6e6964] duration-300 transition-all cursor-pointer"
+              onClick={() => setIsModalOpen(true)}
+            >
+              Esqueceu a senha?
+            </p>
           </div>
         </div>
       </form>
       <div className="max-lg:hidden lg:w-1/2 h-screen">
         <img src={banner} className="h-full w-full " />
       </div>
-      {isModalOpen && <ResetPassword closeModal={()=>setIsModalOpen(false)}/>}
+      {isModalOpen && (
+        <ResetPassword
+          closeModal={() => setIsModalOpen(false)}
+          setCode={setCode}
+          openCodeModal={() => setIsCodeModalOpen(true)}
+          setEmail={setResetEmail}
+          email={resetEmail}
+        />
+      )}
+      {isCodeModalOpen && (
+        <CodePassword
+          closeModal={() => setIsCodeModalOpen(false)}
+          code={code}
+          openResetModal={() => setIsResetModalOpen(true)}
+        />
+      )}
+      {isResetModalOpen && <NewPassword closeModal={()=> setIsResetModalOpen(false)} email={resetEmail}/>}
     </div>
   );
 }
